@@ -1,4 +1,4 @@
-var gadu = require('../').Gadu
+var gadu = require('../lib/gadu.js').Gadu
 console.log(gadu.version())
 console.log(gadu.GG_EVENT_CONN_SUCCESS);
 console.log(gadu.GG_EVENT_CONN_FAILED);
