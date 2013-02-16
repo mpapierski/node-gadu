@@ -121,14 +121,18 @@ v8::Handle<v8::Value> Session::Notify(const v8::Arguments& args) {
 	// Convert v8::Array of Numbers to std::vector.
 	std::vector<uin_t> contacts;
 	if ((args.Length() == 1) && args[0]->IsArray()) {
-		Local<Array> values = Local<Array>::Cast(args[0]);
-		contacts.resize(values->Length());
+		Handle<Array> values = Handle<Array>::Cast(args[0]);
+		std::vector<uin_t> vec(values->Length());
 		for (unsigned int i = 0; i < values->Length(); i++) {
-			if (values->CloneElementAt(i)->IsNumber()) {
+			Local<Value> index = Number::New(i);
+			Local<Value> value = values->Get(index);
+			if (!value->IsNumber()) {
 				return ThrowException(Exception::TypeError(String::New("Invalid uin")));
 			}
-			contacts[i] = values->CloneElementAt(i)->NumberValue();
+			uin_t uin = value->ToObject()->Uint32Value();
+			vec[i] = uin;
 		}
+		contacts.swap(vec);
 	}
 	// Notify server with contact list.
 	if (gg_notify(sess, contacts.data(), contacts.size()) < 0) {
@@ -211,12 +215,16 @@ void Session::gadu_perform(uv_poll_t *req, int status, int events) {
 			NODE_SET_ATTRIBUTE(target, "sender", Number::New(e->event.msg.sender));
 			NODE_SET_ATTRIBUTE(target, "msgclass", Number::New(e->event.msg.msgclass));
 			NODE_SET_ATTRIBUTE(target, "time", Number::New(e->event.msg.time));
+
+			Local<Array> recipients = Array::New(e->event.msg.recipients_count);
+			printf("recipients count %d\n",e->event.msg.recipients_count);
+			for (int i = 0; i < e->event.msg.recipients_count; i++) {
+				recipients->Set(Number::New(i), Number::New(*(e->event.msg.recipients + i)));
+			}
+			NODE_SET_ATTRIBUTE(target, "recipients", recipients);
 			// TODO:
-			// recipients_count
-			// recipients
 			// formats_length
 			// formats
-			// seq
 			NODE_SET_ATTRIBUTE(target, "seq", Number::New(e->event.msg.seq));
 			char * xhtml_message = reinterpret_cast<char*>(e->event.msg.xhtml_message);
 			NODE_SET_ATTRIBUTE(target, "xhtml_message", !xhtml_message ? Null() : String::New(xhtml_message));
