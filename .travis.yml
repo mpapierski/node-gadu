@@ -4,6 +4,7 @@ env:
 node_js:
   - 0.8
 before_install:
+  - "pushd $PWD"
   - "cd /tmp"
   - "wget http://toxygen.net/libgadu/files/libgadu-$LIBGADU_VERSION.tar.gz"
   - "tar -zxvf libgadu-$LIBGADU_VERSION.tar.gz"
@@ -11,3 +12,4 @@ before_install:
   - "./configure"
   - "make"
   - "sudo make install"
+  - "popd"
