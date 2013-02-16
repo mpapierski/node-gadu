@@ -10,6 +10,7 @@ public:
 	static void Init(v8::Handle<v8::Object> target);
 
 private:
+	static v8::Persistent<v8::Function> constructor;
 	Session();
 	~Session();
 
@@ -19,6 +20,19 @@ private:
 	 */
 	static v8::Handle<v8::Value> Login(const v8::Arguments& args);
 
+	/**
+	 * Send message.
+	 */
+	static v8::Handle<v8::Value> SendMessage(const v8::Arguments& args);
+
+	/**
+	 * Notify with contact list
+	 */
+	static v8::Handle<v8::Value> Notify(const v8::Arguments& args);
+	/**
+	 * Logoff from server
+	 */
+	static v8::Handle<v8::Value> Logoff(const v8::Arguments& args);
 	/**
 	 * Low-level handle.
 	 */

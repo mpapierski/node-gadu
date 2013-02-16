@@ -14,22 +14,27 @@ Session::Session()
 	, timer_poll_(0) {
 }
 Session::~Session() {
-	if (!session_)
-		return;
-	::gg_free_session(session_);
 }
+
+
+Persistent<Function> Session::constructor;
 
 void Session::Init(Handle<Object> target) {
 	// gg_debug_level = 255;
 	// Prepare constructor template
 	Local<FunctionTemplate> tpl = FunctionTemplate::New(New);
+
 	tpl->SetClassName(String::NewSymbol("Session"));
 	tpl->InstanceTemplate()->SetInternalFieldCount(1);
+
 	// Prototype
 
 	NODE_SET_PROTOTYPE_METHOD(tpl, "login", Login);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "logoff", Logoff);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "send", SendMessage);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "notify", Notify);
 
-	Persistent<Function> constructor = Persistent<Function>::New(tpl->GetFunction());
+	constructor = Persistent<Function>::New(tpl->GetFunction());
 	target->Set(String::NewSymbol("Session"), constructor);
 }
 
@@ -42,10 +47,10 @@ Handle<Value> Session::New(const Arguments& args) {
 	// Install global DNS resolver
 	if (gg_global_set_custom_resolver(uv_resolver_start, uv_resolver_cleanup) < 0) {
 		const char * error = strerror(errno);
-		return scope.Close(ThrowException(String::New(error)));
+		return ThrowException(String::New(error));
 	}
 
-	return scope.Close(args.This());
+	return args.This();
 }
 
 v8::Handle<v8::Value> Session::Login(const v8::Arguments& args) {
@@ -62,7 +67,7 @@ v8::Handle<v8::Value> Session::Login(const v8::Arguments& args) {
 	struct ::gg_session * sess = ::gg_login(&p);
 	if (!sess) {
 		const char * error = strerror(errno);
-		return scope.Close(v8::ThrowException(v8::String::New(error)));
+		return v8::ThrowException(v8::String::New(error));
 	}
 	obj->session_ = sess;
 	// Start polling
@@ -80,21 +85,54 @@ v8::Handle<v8::Value> Session::Login(const v8::Arguments& args) {
 		uv_poll_start(obj->poll_fd_, UV_READABLE, gadu_perform);
 	if ((sess->check & GG_CHECK_WRITE))
 		uv_poll_start(obj->poll_fd_, UV_WRITABLE, gadu_perform);
-	return scope.Close(args.This());
+	return args.This();
+}
+
+v8::Handle<v8::Value> Session::SendMessage(const v8::Arguments& args) {
+	HandleScope scope;
+	Session * obj = ObjectWrap::Unwrap<Session>(args.This());
+	unsigned long uin = args[0]->NumberValue();
+	unsigned char * text = reinterpret_cast<unsigned char*>(*v8::String::AsciiValue(args[1]->ToString()));
+	if (gg_send_message(obj->session_, GG_CLASS_MSG, uin, text) < 0) {
+		obj->disconnect();
+	}
+	return args.This();
+}
+
+v8::Handle<v8::Value> Session::Notify(const v8::Arguments& args) {
+	HandleScope scope;
+	Session * obj = ObjectWrap::Unwrap<Session>(args.This());
+	struct gg_session * sess = obj->session_;
+	// Notify server with contact list.
+	if (gg_notify(sess, 0, 0) < 0) {
+		obj->disconnect();
+	}
+	return args.This();
+}
+
+v8::Handle<v8::Value> Session::Logoff(const v8::Arguments& args) {
+	HandleScope scope;
+	Session * obj = ObjectWrap::Unwrap<Session>(args.This());
+	struct gg_session * sess = obj->session_;
+	gg_logoff(sess);
+	uv_poll_stop(obj->poll_fd_);
+	uv_close((uv_handle_t*)obj->poll_fd_, (uv_close_cb)free);
+	uv_timer_stop(obj->timer_poll_);
+	uv_close((uv_handle_t*)obj->timer_poll_, (uv_close_cb)free);
+	gg_free_session(sess);
+	return args.This();
 }
 
 void Session::gadu_perform(uv_poll_t *req, int status, int events) {
 	Session * obj = static_cast<Session *>(req->data);
 	struct gg_session * sess = obj->session_;
-
-	if ((events & UV_READABLE) || (events & UV_WRITABLE))
-	{
+	
+	if (sess && ((events & UV_READABLE) || (events & UV_WRITABLE) || (sess->timeout == 0 && sess->soft_timeout))) {	
 		struct gg_event * e = 0;
 		raii_destructor<struct gg_event> destructor(e, &gg_free_event);
-
+		
 		if (!(e = gg_watch_fd(sess))) {
 			// In case of error, event value passed is Undefined.
-			printf("huj\n");
 			Local<Value> argv[1] = { Local<Value>::New(Undefined()) };
 			obj->login_callback_->Call(Context::GetCurrent()->Global(), 1, argv);
 			obj->disconnect();
@@ -130,7 +168,8 @@ void Session::ping_callback(uv_timer_t * timer, int status) {
 }
 
 void Session::disconnect() {
-	gg_free_session(session_);
 	uv_poll_stop(poll_fd_);
 	uv_close((uv_handle_t*)poll_fd_, (uv_close_cb)free);
+	uv_timer_stop(timer_poll_);
+	uv_close((uv_handle_t*)timer_poll_, (uv_close_cb)free);
 }

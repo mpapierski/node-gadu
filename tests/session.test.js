@@ -16,5 +16,11 @@ describe('session', function() {
 		it('has login function', function() {
 			assert(session.login instanceof Function)
 		})
+		it('has logoff function', function() {
+			assert(session.logoff instanceof Function)
+		})
+		it('has notify function', function() {
+			assert(session.notify instanceof Function)
+		})
 	})
 })
