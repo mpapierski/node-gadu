@@ -1,4 +1,4 @@
-# node-gadu
+# node-gadu [![Build Status](https://travis-ci.org/mpapierski/node-gadu.png?branch=master)](https://travis-ci.org/mpapierski/node-gadu)
 Asynchronous, non-blocking libgadu bindings.
 
 ## Requirements
