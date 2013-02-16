@@ -17,8 +17,7 @@ static void on_resolved(uv_getaddrinfo_t * resolver, int status, struct addrinfo
 	struct in_addr addr_ip[2];
 	int addr_count = 1;
 	inet_pton(AF_INET, addr, &addr_ip[0]);
-	uv_resolver_data_t * data = static_cast<uv_resolver_data_t *>(resolver->data);
-	int fd = data->pipes[0];
+	int fd = *reinterpret_cast<int*>(resolver->data);
 	if (send(fd, addr_ip, (addr_count + 1) * sizeof(struct in_addr), 0) != (int)((addr_count + 1) * sizeof(struct in_addr))) {
 		// Unable to send data?
 	}
@@ -26,31 +25,23 @@ static void on_resolved(uv_getaddrinfo_t * resolver, int status, struct addrinfo
 
 int uv_resolver_start(int* fd, void** priv_data, const char* name) {
 	uv_loop_t * loop = uv_default_loop();
-	// Create temporary data for this query.
-	uv_resolver_data_t * data = new uv_resolver_data_t;
+	int pipes[2];
 	// Set up pipes.
-	if (socketpair(AF_LOCAL, SOCK_STREAM, 0, data->pipes) == -1) {
-		printf("nie\n");
+	if (socketpair(AF_LOCAL, SOCK_STREAM, 0, pipes) == -1) {
 		return -1;
 	}
 	// Spawn new UV resolver/
 	uv_getaddrinfo_t resolver;
-	resolver.data = data;
+	resolver.data = &pipes[1];
 	int r = uv_getaddrinfo(loop, &resolver, on_resolved, name, NULL, NULL);
 	if (r < 0) {
 		// Unable to start DNS resolver.
 		return r;
 	}
-	*fd = data->pipes[1];
-	*priv_data = static_cast<void*>(data);
+	*fd = pipes[0];
+	*priv_data = 0;
 	return 0;
 }
 
 void uv_resolver_cleanup(void** priv_data, int force) {
-	uv_resolver_data_t * data = static_cast<uv_resolver_data_t *>(*priv_data);
-	// Close the pipes
-	close(data->pipes[0]);
-	close(data->pipes[1]);
-	// Free up memory
-	delete data;
 }

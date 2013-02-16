@@ -4,14 +4,6 @@
 #include <unistd.h>
 
 /**
- * Structure for holding temporary data used for DNS queries.
- */
-struct uv_resolver_data_t {
-	// DNS resolve result is sent by pipe.
-	int pipes[2];
-};
-
-/**
  * Start DNS resolve using libuv's async dns resolver.
  */
 int uv_resolver_start(int* fd, void** priv_data, const char* name);
