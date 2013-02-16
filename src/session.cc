@@ -1,6 +1,7 @@
 #include <node.h>
 #include <cerrno>
 #include <cstring>
+#include <cstdlib>
 #include "session.h"
 #include "helpers.h"
 
