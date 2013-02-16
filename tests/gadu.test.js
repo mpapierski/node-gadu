@@ -34,4 +34,27 @@ describe('library', function() {
 			assert.equal(Gadu.GG_ACK_NOT_DELIVERED, 0x0006)	
 		})
 	})
+	describe('message classes', function() {
+		it('has queued', function() {
+			assert.equal(Gadu.GG_CLASS_QUEUED, 0x0001)
+		})
+		it('has offline', function() {
+			assert.equal(Gadu.GG_CLASS_OFFLINE, 0x0001)
+		})
+		it('has msg', function() {
+			assert.equal(Gadu.GG_CLASS_MSG, 0x0004)
+		})
+		it('has chat', function() {
+			assert.equal(Gadu.GG_CLASS_CHAT, 0x0008)
+		})
+		it('has ctcp', function() {
+			assert.equal(Gadu.GG_CLASS_CTCP, 0x0010)
+		})
+		it('has ack', function() {
+			assert.equal(Gadu.GG_CLASS_ACK, 0x0020)
+		})
+		it('has ext', function() {
+			assert.equal(Gadu.GG_CLASS_EXT, 0x0020)
+		})
+	})
 })
