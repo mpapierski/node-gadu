@@ -35,7 +35,7 @@ Handle<Value> Session::New(const Arguments& args) {
 	HandleScope scope;
 	Session * obj = new Session();
 	obj->Wrap(args.This());
-	return args.This();
+	return scope.Close(args.This());
 }
 
 v8::Handle<v8::Value> Session::Login(const v8::Arguments& args) {
@@ -46,6 +46,7 @@ v8::Handle<v8::Value> Session::Login(const v8::Arguments& args) {
 	p.uin = args[0]->NumberValue();
 	p.password = *v8::String::AsciiValue(args[1]->ToString());
 	p.async = 1;
+	// Save persistent callback
 	obj->login_callback_ = Persistent<Function>::New(Local<Function>::Cast(args[2]));
 
 	// Do login.
@@ -64,7 +65,6 @@ v8::Handle<v8::Value> Session::Login(const v8::Arguments& args) {
 		uv_poll_start(obj->poll_fd_, UV_READABLE, gadu_perform);
 	if ((sess->check & GG_CHECK_WRITE))
 		uv_poll_start(obj->poll_fd_, UV_WRITABLE, gadu_perform);
-
 	return scope.Close(args.This());
 }
 
@@ -83,6 +83,9 @@ void Session::gadu_perform(uv_poll_t *req, int status, int events) {
 				Local<Value> argv[1] = { Local<Value>::New(Undefined()) };
 				obj->login_callback_->Call(Context::GetCurrent()->Global(), 1, argv);
 				gg_free_session(sess);
+				uv_poll_stop(obj->poll_fd_);
+				uv_close((uv_handle_t*)obj->poll_fd_, (uv_close_cb)free);
+				return;
 		}
 		
 		// Construct a new object with the events data.
@@ -93,8 +96,15 @@ void Session::gadu_perform(uv_poll_t *req, int status, int events) {
 		// Call the callback with newly created object.
 		Local<Value> argv[1] = { Local<Value>::New(event) };
 		obj->login_callback_->Call(Context::GetCurrent()->Global(), 1, argv);
+		if (e->type == GG_EVENT_CONN_FAILED) {
+			gg_logoff(sess);
+			gg_free_session(sess);
+			uv_poll_stop(obj->poll_fd_);
+			uv_close((uv_handle_t*)obj->poll_fd_, (uv_close_cb)free);
+			return;
+		}
 	}
-
+	// Watch for R/W again
 	if ((sess->check & GG_CHECK_READ))
 		uv_poll_start(obj->poll_fd_, UV_READABLE, gadu_perform);
 	if ((sess->check & GG_CHECK_WRITE))
