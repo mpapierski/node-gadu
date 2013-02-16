@@ -1,6 +1,8 @@
 #if !defined(UV_RESOLVER_H)
 #define UV_RESOLVER_H
 
+#include <unistd.h>
+
 /**
  * Structure for holding temporary data used for DNS queries.
  */
