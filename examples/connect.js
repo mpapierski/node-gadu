@@ -15,4 +15,12 @@ s1.login(process.env.UIN, process.env.PASSWORD, function(ev) {
 	else if (ev.type == gadu.GG_EVENT_CONN_FAILED) {
 		console.log('connection failed')
 	}
+	else if (ev.type == gadu.GG_EVENT_MSG) {
+		var text = ev.target.message;
+		if (text == "busy1") {
+			s1.changeStatus(gadu.GG_STATUS_BUSY);
+		} else if (text == "busy2") {
+			s1.changeStatus(gadu.GG_STATUS_BUSY_DESCR, "hello world");
+		}
+	}
 });

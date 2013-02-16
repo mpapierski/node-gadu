@@ -33,6 +33,7 @@ void Session::Init(Handle<Object> target) {
 	NODE_SET_PROTOTYPE_METHOD(tpl, "logoff", Logoff);
 	NODE_SET_PROTOTYPE_METHOD(tpl, "send", SendMessage);
 	NODE_SET_PROTOTYPE_METHOD(tpl, "notify", Notify);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "changeStatus", ChangeStatus);
 
 	constructor = Persistent<Function>::New(tpl->GetFunction());
 	target->Set(String::NewSymbol("Session"), constructor);
@@ -61,6 +62,8 @@ v8::Handle<v8::Value> Session::Login(const v8::Arguments& args) {
 	p.uin = args[0]->NumberValue();
 	p.password = *v8::String::AsciiValue(args[1]->ToString());
 	p.async = 1;
+	// Features
+	p.protocol_features = GG_FEATURE_IMAGE_DESCR;
 	// Save persistent callback
 	obj->login_callback_ = Persistent<Function>::New(Local<Function>::Cast(args[2]));
 	// Do login.
@@ -147,11 +150,39 @@ v8::Handle<v8::Value> Session::Logoff(const v8::Arguments& args) {
 	return args.This();
 }
 
+v8::Handle<v8::Value> Session::ChangeStatus(const v8::Arguments& args) {
+	HandleScope scope;
+	Session * obj = ObjectWrap::Unwrap<Session>(args.This());
+	struct gg_session * sess = obj->session_;
+	int result = 0;
+	if (args.Length() <= 2) {
+		// Status
+		int status = args[0]->NumberValue();
+		if (args.Length() == 2) {
+			// Description is optional
+			if (!args[1]->IsString()) {
+				return ThrowException(Exception::TypeError(String::New("String required")));
+			}
+			const char * message = *String::AsciiValue(args[1]->ToString());
+			result = gg_change_status_descr(sess, status, message);
+		} else {
+			printf("zmieniam status %d\n", status);
+			result = gg_change_status(sess, status);
+		}
+		if (result < 0) {
+			obj->disconnect();
+		}
+		return args.This();
+	}
+	return ThrowException(Exception::Error(String::New("Invalid arguments")));
+}
+
 void Session::gadu_perform(uv_poll_t *req, int status, int events) {
 	Session * obj = static_cast<Session *>(req->data);
 	struct gg_session * sess = obj->session_;
 	
-	if (sess && ((events & UV_READABLE) || (events & UV_WRITABLE) || (sess->timeout == 0 && sess->soft_timeout))) {	
+	if (sess && ((events & UV_READABLE) ||
+			(events & UV_WRITABLE) || (sess->timeout == 0 && sess->soft_timeout))) {	
 		struct gg_event * e = 0;
 		raii_destructor<struct gg_event> destructor(e, &gg_free_event);
 		

@@ -22,5 +22,8 @@ describe('session', function() {
 		it('has notify function', function() {
 			assert(session.notify instanceof Function)
 		})
+		it('has change status function', function() {
+			assert(session.changeStatus instanceof Function)
+		})
 	})
 })

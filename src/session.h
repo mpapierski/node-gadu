@@ -36,6 +36,10 @@ private:
 	 */
 	static v8::Handle<v8::Value> Logoff(const v8::Arguments& args);
 	/**
+	 * Change status
+	 */
+	static v8::Handle<v8::Value> ChangeStatus(const v8::Arguments& args);
+	/**
 	 * Low-level handle.
 	 */
 	struct gg_session * session_;
