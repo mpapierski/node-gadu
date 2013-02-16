@@ -2,7 +2,7 @@
   "targets": [
     {
       "target_name": "gadu",
-      "sources": [ "src/gadu.cc" ],
+      "sources": [ "src/gadu.cc", "src/session.cc" ],
       "libraries": [ "-lgadu" ]
     }
   ]
