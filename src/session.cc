@@ -103,8 +103,21 @@ v8::Handle<v8::Value> Session::Notify(const v8::Arguments& args) {
 	HandleScope scope;
 	Session * obj = ObjectWrap::Unwrap<Session>(args.This());
 	struct gg_session * sess = obj->session_;
+
+	// Convert v8::Array of Numbers to std::vector.
+	std::vector<uin_t> contacts;
+	if ((args.Length() == 1) && args[0]->IsArray()) {
+		Local<Array> values = Local<Array>::Cast(args[0]);
+		contacts.resize(values->Length());
+		for (unsigned int i = 0; i < values->Length(); i++) {
+			if (values->CloneElementAt(i)->IsNumber()) {
+				return ThrowException(Exception::TypeError(String::New("Invalid uin")));
+			}
+			contacts[i] = values->CloneElementAt(i)->NumberValue();
+		}
+	}
 	// Notify server with contact list.
-	if (gg_notify(sess, 0, 0) < 0) {
+	if (gg_notify(sess, contacts.data(), contacts.size()) < 0) {
 		obj->disconnect();
 	}
 	return args.This();

@@ -1,8 +1,9 @@
 #ifndef SESSION_H
 #define SESSION_H
 
-#include <node.h>
+#include <vector>
 #include <ctime>
+#include <node.h>
 #include "libgadu.h"
 
 class Session : public node::ObjectWrap {
