@@ -1,0 +1,12 @@
+language: node_js
+env:
+	- LIBGADU_VERSION="1.11.2"
+node_js:
+	- 0.8
+before_install:
+	- "wget http://toxygen.net/libgadu/files/libgadu-$LIBGADU_VERSION.tar.gz"
+	- "tar -zxvf libgadu-$LIBGADU_VERSION.tar.gz"
+	- "cd libgadu-$LIBGADU_VERSION"
+	- "./configure"
+	- "make"
+	- "make install"
