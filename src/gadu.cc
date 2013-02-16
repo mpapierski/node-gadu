@@ -20,6 +20,8 @@ extern "C" {
  */
 void init(Handle<Object> target) {
 	NODE_SET_METHOD(target, "version", Version);
+	NODE_DEFINE_CONSTANT(target, GG_EVENT_CONN_SUCCESS);
+	NODE_DEFINE_CONSTANT(target, GG_EVENT_CONN_FAILED);
 	Session::Init(target);
 }
 

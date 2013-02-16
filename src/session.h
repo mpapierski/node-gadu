@@ -37,7 +37,10 @@ private:
 	 */
 	static void gadu_perform(uv_poll_t *req, int status, int events);
 
-	time_t now_, last_;
+	/**
+	 * Login callback.
+	 */
+	v8::Persistent<v8::Function> login_callback_;
 };
 
 #endif
