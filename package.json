@@ -1,0 +1,19 @@
+{
+	"name": "gadu",
+	"description": "Asynchronous, non-blocking libgadu bindings",
+	"version": "0.0.1",
+	"homepage": "https://github.com/mpapierski/node-gadu/",
+	"author": {
+		"name": "Michał Papierski",
+		"url": "http://michal.papierski.net/",
+		"email": "michal@papierski.net"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git://github.com/mpapierski/node-gadu.git"
+	},
+	"devDependencies": {
+		"mocha": "1.8.1"
+	},
+	"main": "./lib/gadu.js"
+}
