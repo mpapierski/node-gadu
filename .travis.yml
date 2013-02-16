@@ -9,4 +9,4 @@ before_install:
   - "cd libgadu-$LIBGADU_VERSION"
   - "./configure"
   - "make"
-  - "make install"
+  - "sudo make install"
