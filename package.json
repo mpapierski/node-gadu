@@ -12,6 +12,9 @@
 		"type": "git",
 		"url": "git://github.com/mpapierski/node-gadu.git"
 	},
+	"scripts": {
+		"test": "make test"
+	},
 	"devDependencies": {
 		"mocha": "1.8.1"
 	},
