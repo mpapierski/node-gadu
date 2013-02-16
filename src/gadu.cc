@@ -20,9 +20,17 @@ extern "C" {
  */
 void init(Handle<Object> target) {
 	NODE_SET_METHOD(target, "version", Version);
+	// Events
 	NODE_DEFINE_CONSTANT(target, GG_EVENT_CONN_SUCCESS);
 	NODE_DEFINE_CONSTANT(target, GG_EVENT_CONN_FAILED);
 	NODE_DEFINE_CONSTANT(target, GG_EVENT_MSG);
+	// Ack defines
+	NODE_DEFINE_CONSTANT(target, GG_ACK_BLOCKED);
+	NODE_DEFINE_CONSTANT(target, GG_ACK_DELIVERED);
+	NODE_DEFINE_CONSTANT(target, GG_ACK_QUEUED);
+	NODE_DEFINE_CONSTANT(target, GG_ACK_MBOXFULL);
+	NODE_DEFINE_CONSTANT(target, GG_ACK_NOT_DELIVERED);
+
 	Session::Init(target);
 }
 

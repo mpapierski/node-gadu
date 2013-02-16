@@ -93,9 +93,20 @@ v8::Handle<v8::Value> Session::SendMessage(const v8::Arguments& args) {
 	Session * obj = ObjectWrap::Unwrap<Session>(args.This());
 	unsigned long uin = args[0]->NumberValue();
 	unsigned char * text = reinterpret_cast<unsigned char*>(*v8::String::AsciiValue(args[1]->ToString()));
-	if (gg_send_message(obj->session_, GG_CLASS_MSG, uin, text) < 0) {
+	int seq = gg_send_message(obj->session_, GG_CLASS_MSG, uin, text);
+	if (seq < 0) {
 		obj->disconnect();
 	}
+
+	if (args.Length() == 2) {
+		// Return here if only two arguments were passed.
+		return args.This();
+	}
+	if (!args[2]->IsFunction()) {
+		return ThrowException(Exception::TypeError(String::New("Callback is not a function.")));
+	}
+	// Save callback
+	obj->outgoing_messages_[seq] = Persistent<Function>::New(Local<Function>::Cast(args[2]));
 	return args.This();
 }
 
@@ -180,6 +191,23 @@ void Session::gadu_perform(uv_poll_t *req, int status, int events) {
 			NODE_SET_ATTRIBUTE(target, "xhtml_message", !xhtml_message ? Null() : String::New(xhtml_message));
 			char * message = reinterpret_cast<char*>(e->event.msg.message);
 			NODE_SET_ATTRIBUTE(target, "message", !message ? Null() : String::New(message));
+			break;
+		}
+		case GG_EVENT_ACK: {
+			// Message is acknowledged.
+			NODE_SET_ATTRIBUTE(target, "recipient", Number::New(e->event.ack.recipient));
+			NODE_SET_ATTRIBUTE(target, "status", Number::New(e->event.ack.status));
+			int const seq = e->event.ack.seq;
+			NODE_SET_ATTRIBUTE(target, "seq", Number::New(seq));
+
+			// Execute callback associated with this seq code.
+			std::map<int, Persistent<Function> >::iterator it = obj->outgoing_messages_.find(seq);
+			if (it != obj->outgoing_messages_.end()) {
+				// Execute callback passing `target` (recipient, status, seq) as an argument.
+				Local<Value> argv[1] = { Local<Value>::New(target) };
+				it->second->Call(Context::GetCurrent()->Global(), 1, argv);
+				obj->outgoing_messages_.erase(it);
+			}
 			break;
 		}
 		default:
