@@ -10,7 +10,8 @@ using namespace v8;
 
 Session::Session()
 	: session_(0)
-	, poll_fd_(0) {
+	, poll_fd_(0)
+	, timer_poll_(0) {
 }
 Session::~Session() {
 	if (!session_)
@@ -68,6 +69,12 @@ v8::Handle<v8::Value> Session::Login(const v8::Arguments& args) {
 	obj->poll_fd_ = static_cast<uv_poll_t*>(malloc(sizeof(uv_poll_t)));
 	uv_poll_init(uv_default_loop(), obj->poll_fd_, sess->fd);
 	obj->poll_fd_->data = obj;
+	// Setup ping timer.
+	obj->timer_poll_ = new uv_timer_t;
+	uv_timer_init(uv_default_loop(), obj->timer_poll_);
+	obj->timer_poll_->data = obj;
+	uv_timer_start(obj->timer_poll_, ping_callback, 0, 60000);
+
 	// Watch for R/W
 	if ((sess->check & GG_CHECK_READ))
 		uv_poll_start(obj->poll_fd_, UV_READABLE, gadu_perform);
@@ -78,7 +85,6 @@ v8::Handle<v8::Value> Session::Login(const v8::Arguments& args) {
 
 void Session::gadu_perform(uv_poll_t *req, int status, int events) {
 	Session * obj = static_cast<Session *>(req->data);
-	
 	struct gg_session * sess = obj->session_;
 
 	if ((events & UV_READABLE) || (events & UV_WRITABLE))
@@ -88,11 +94,10 @@ void Session::gadu_perform(uv_poll_t *req, int status, int events) {
 
 		if (!(e = gg_watch_fd(sess))) {
 			// In case of error, event value passed is Undefined.
+			printf("huj\n");
 			Local<Value> argv[1] = { Local<Value>::New(Undefined()) };
 			obj->login_callback_->Call(Context::GetCurrent()->Global(), 1, argv);
-			gg_free_session(sess);
-			uv_poll_stop(obj->poll_fd_);
-			uv_close((uv_handle_t*)obj->poll_fd_, (uv_close_cb)free);
+			obj->disconnect();
 			return;
 		}
 		
@@ -106,9 +111,7 @@ void Session::gadu_perform(uv_poll_t *req, int status, int events) {
 		obj->login_callback_->Call(Context::GetCurrent()->Global(), 1, argv);
 		if (e->type == GG_EVENT_CONN_FAILED) {
 			gg_logoff(sess);
-			gg_free_session(sess);
-			uv_poll_stop(obj->poll_fd_);
-			uv_close((uv_handle_t*)obj->poll_fd_, (uv_close_cb)free);
+			obj->disconnect();
 			return;
 		}
 	}
@@ -117,4 +120,17 @@ void Session::gadu_perform(uv_poll_t *req, int status, int events) {
 		uv_poll_start(obj->poll_fd_, UV_READABLE, gadu_perform);
 	if ((sess->check & GG_CHECK_WRITE))
 		uv_poll_start(obj->poll_fd_, UV_WRITABLE, gadu_perform);
+}
+
+void Session::ping_callback(uv_timer_t * timer, int status) {
+	Session * obj = static_cast<Session *>(timer->data);
+	if (gg_ping(obj->session_) < 0) {
+		return;
+	}	
+}
+
+void Session::disconnect() {
+	gg_free_session(session_);
+	uv_poll_stop(poll_fd_);
+	uv_close((uv_handle_t*)poll_fd_, (uv_close_cb)free);
 }

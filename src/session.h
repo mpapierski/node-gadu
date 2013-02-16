@@ -41,6 +41,21 @@ private:
 	 * Login callback.
 	 */
 	v8::Persistent<v8::Function> login_callback_;
+
+	/**
+	 * Ping timer poller
+	 */
+	uv_timer_t * timer_poll_;
+
+	/**
+	 * Ping timer callback
+	 */
+	static void ping_callback(uv_timer_t *, int status);
+
+	/**
+	 * Disconnect session.
+	 */
+	void disconnect();
 };
 
 #endif
