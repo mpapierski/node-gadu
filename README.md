@@ -15,7 +15,8 @@ See [http://toxygen.net/libgadu/](http://toxygen.net/libgadu/).
 
 ## TODO
 
- * Implement `libuv`'s asynchronous DNS resolver. Forking might cause problems when multiple threads are present.
+ * ~~Implement `libuv`'s asynchronous DNS resolver. Forking might cause problems when multiple threads are present.~~
+ * Implement timeouts for the libuv implementation of resolver.
 
 ## Documentation
 

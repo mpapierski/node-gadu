@@ -1,9 +1,9 @@
-var gadu = require('./build/Release/gadu.node')
+var gadu = require('../').Gadu
 console.log(gadu.version())
 console.log(gadu.GG_EVENT_CONN_SUCCESS);
 console.log(gadu.GG_EVENT_CONN_FAILED);
 var s1 = new gadu.Session()
-s1.login(process.env.UIN, process.env.PWD, function(ev) {
+s1.login(process.env.UIN, process.env.PASSWORD, function(ev) {
 	if (!ev) {
 		console.log('error')
 		return;
