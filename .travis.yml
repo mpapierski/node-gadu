@@ -4,6 +4,7 @@ env:
 node_js:
   - 0.8
 before_install:
+  - "cd /tmp"
   - "wget http://toxygen.net/libgadu/files/libgadu-$LIBGADU_VERSION.tar.gz"
   - "tar -zxvf libgadu-$LIBGADU_VERSION.tar.gz"
   - "cd libgadu-$LIBGADU_VERSION"
