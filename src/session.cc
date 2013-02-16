@@ -141,17 +141,43 @@ void Session::gadu_perform(uv_poll_t *req, int status, int events) {
 		
 		// Construct a new object with the events data.
 		Local<Object> event = Object::New();
-		event->Set(String::NewSymbol("type"),
-			v8::Number::New(e->type),
-			static_cast<v8::PropertyAttribute>(v8::ReadOnly|v8::DontDelete));
-		// Call the callback with newly created object.
-		Local<Value> argv[1] = { Local<Value>::New(event) };
-		obj->login_callback_->Call(Context::GetCurrent()->Global(), 1, argv);
-		if (e->type == GG_EVENT_CONN_FAILED) {
+
+		NODE_SET_ATTRIBUTE(event, "type", Number::New(e->type));
+
+		Local<Object> target = Object::New();
+		switch (e->type) {
+		case GG_EVENT_CONN_FAILED:
 			gg_logoff(sess);
 			obj->disconnect();
 			return;
+		case GG_EVENT_MSG: {
+			// Received message.
+
+			NODE_SET_ATTRIBUTE(target, "sender", Number::New(e->event.msg.sender));
+			NODE_SET_ATTRIBUTE(target, "msgclass", Number::New(e->event.msg.msgclass));
+			NODE_SET_ATTRIBUTE(target, "time", Number::New(e->event.msg.time));
+			// TODO:
+			// recipients_count
+			// recipients
+			// formats_length
+			// formats
+			// seq
+			NODE_SET_ATTRIBUTE(target, "seq", Number::New(e->event.msg.seq));
+			char * xhtml_message = reinterpret_cast<char*>(e->event.msg.xhtml_message);
+			NODE_SET_ATTRIBUTE(target, "xhtml_message", !xhtml_message ? Null() : String::New(xhtml_message));
+			char * message = reinterpret_cast<char*>(e->event.msg.message);
+			NODE_SET_ATTRIBUTE(target, "message", !message ? Null() : String::New(message));
+			break;
 		}
+		default:
+			break;
+		}
+		// Add target event details to the event object.
+		event->Set(String::NewSymbol("target"), target);
+		// Call the callback with newly created object.
+		Local<Value> argv[1] = { Local<Value>::New(event) };
+		obj->login_callback_->Call(Context::GetCurrent()->Global(), 1, argv);
+		
 	}
 	// Watch for R/W again
 	if ((sess->check & GG_CHECK_READ))

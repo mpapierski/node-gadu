@@ -13,5 +13,8 @@ describe('library', function() {
 		it('has connection failed', function() {
 			assert.equal(Gadu.GG_EVENT_CONN_FAILED, 7)
 		})
+		it('has msg', function() {
+			assert.equal(Gadu.GG_EVENT_MSG, 1)
+		})
 	})
 })
