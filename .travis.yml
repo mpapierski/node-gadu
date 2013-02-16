@@ -9,7 +9,7 @@ before_install:
   - "wget http://toxygen.net/libgadu/files/libgadu-$LIBGADU_VERSION.tar.gz"
   - "tar -zxvf libgadu-$LIBGADU_VERSION.tar.gz"
   - "cd libgadu-$LIBGADU_VERSION"
-  - "./configure"
+  - "./configure --prefix=/usr"
   - "make"
   - "sudo make install"
   - "popd"
