@@ -1,7 +1,7 @@
 {
 	"name": "gadu",
 	"description": "Asynchronous, non-blocking libgadu bindings",
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"homepage": "https://github.com/mpapierski/node-gadu/",
 	"author": {
 		"name": "Michał Papierski",
