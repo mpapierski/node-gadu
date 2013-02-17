@@ -16,7 +16,8 @@
 		"test": "make test"
 	},
 	"devDependencies": {
-		"mocha": "1.8.1"
+		"mocha": "1.8.1",
+		"sinon": "1.5.2"
 	},
 	"main": "./lib/gadu.js"
 }

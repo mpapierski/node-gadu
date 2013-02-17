@@ -16,6 +16,9 @@ describe('library', function() {
 		it('has msg', function() {
 			assert.equal(Gadu.GG_EVENT_MSG, 1)
 		})
+		it('has ack', function() {
+			assert.equal(Gadu.GG_EVENT_ACK, 5)
+		})
 	})
 	describe('message ack', function() {
 		it('has value for delivered', function() {

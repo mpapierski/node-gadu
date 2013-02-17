@@ -76,10 +76,6 @@ private:
 	 * Disconnect session.
 	 */
 	void disconnect();
-	/**
-	 * Outgoing messages callbacks. Maps Seq to Callbacks.
-	 */
-	std::map<int, v8::Persistent<v8::Function> > outgoing_messages_;
 };
 
 #endif

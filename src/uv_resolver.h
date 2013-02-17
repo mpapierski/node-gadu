@@ -2,6 +2,16 @@
 #define UV_RESOLVER_H
 
 #include <unistd.h>
+#include <uv.h>
+
+struct uv_resolve_data {
+	// Default loop (just to save a single call!)
+	uv_loop_t * loop;
+	// Resolve data
+	uv_getaddrinfo_t resolve;
+	// Pipes
+	int pipes[2];
+};
 
 /**
  * Start DNS resolve using libuv's async dns resolver.

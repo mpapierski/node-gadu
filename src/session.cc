@@ -100,17 +100,7 @@ v8::Handle<v8::Value> Session::SendMessage(const v8::Arguments& args) {
 	if (seq < 0) {
 		obj->disconnect();
 	}
-
-	if (args.Length() == 2) {
-		// Return here if only two arguments were passed.
-		return args.This();
-	}
-	if (!args[2]->IsFunction()) {
-		return ThrowException(Exception::TypeError(String::New("Callback is not a function.")));
-	}
-	// Save callback
-	obj->outgoing_messages_[seq] = Persistent<Function>::New(Local<Function>::Cast(args[2]));
-	return args.This();
+	return Number::New(seq);
 }
 
 v8::Handle<v8::Value> Session::Notify(const v8::Arguments& args) {
@@ -170,7 +160,6 @@ v8::Handle<v8::Value> Session::ChangeStatus(const v8::Arguments& args) {
 			const char * message = *String::AsciiValue(args[1]->ToString());
 			result = gg_change_status_descr(sess, status, message);
 		} else {
-			printf("zmieniam status %d\n", status);
 			result = gg_change_status(sess, status);
 		}
 		if (result < 0) {
@@ -217,7 +206,6 @@ void Session::gadu_perform(uv_poll_t *req, int status, int events) {
 			NODE_SET_ATTRIBUTE(target, "time", Number::New(e->event.msg.time));
 
 			Local<Array> recipients = Array::New(e->event.msg.recipients_count);
-			printf("recipients count %d\n",e->event.msg.recipients_count);
 			for (int i = 0; i < e->event.msg.recipients_count; i++) {
 				recipients->Set(Number::New(i), Number::New(*(e->event.msg.recipients + i)));
 			}
@@ -236,17 +224,7 @@ void Session::gadu_perform(uv_poll_t *req, int status, int events) {
 			// Message is acknowledged.
 			NODE_SET_ATTRIBUTE(target, "recipient", Number::New(e->event.ack.recipient));
 			NODE_SET_ATTRIBUTE(target, "status", Number::New(e->event.ack.status));
-			int const seq = e->event.ack.seq;
-			NODE_SET_ATTRIBUTE(target, "seq", Number::New(seq));
-
-			// Execute callback associated with this seq code.
-			std::map<int, Persistent<Function> >::iterator it = obj->outgoing_messages_.find(seq);
-			if (it != obj->outgoing_messages_.end()) {
-				// Execute callback passing `target` (recipient, status, seq) as an argument.
-				Local<Value> argv[1] = { Local<Value>::New(target) };
-				it->second->Call(Context::GetCurrent()->Global(), 1, argv);
-				obj->outgoing_messages_.erase(it);
-			}
+			NODE_SET_ATTRIBUTE(target, "seq", Number::New(e->event.ack.seq));
 			break;
 		}
 		default:
@@ -274,8 +252,12 @@ void Session::ping_callback(uv_timer_t * timer, int status) {
 }
 
 void Session::disconnect() {
-	uv_poll_stop(poll_fd_);
-	uv_close((uv_handle_t*)poll_fd_, (uv_close_cb)free);
-	uv_timer_stop(timer_poll_);
-	uv_close((uv_handle_t*)timer_poll_, (uv_close_cb)free);
+	if (poll_fd_) {
+		uv_poll_stop(poll_fd_);
+		uv_close((uv_handle_t*)poll_fd_, (uv_close_cb)free);
+	}
+	if (timer_poll_) {
+		uv_timer_stop(timer_poll_);
+		uv_close((uv_handle_t*)timer_poll_, (uv_close_cb)free);
+	}
 }
