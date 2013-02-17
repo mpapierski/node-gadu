@@ -1,8 +1,10 @@
 #if !defined(UV_RESOLVER_H)
 #define UV_RESOLVER_H
 
+#include <cstdlib>
 #include <unistd.h>
 #include <uv.h>
+#include "helpers.h"
 
 struct uv_resolve_data {
 	// Default loop (just to save a single call!)

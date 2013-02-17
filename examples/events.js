@@ -6,7 +6,6 @@ var connection = new Connection({
 	password: process.env.PASSWORD
 })
 
-
 connection.connect(function() {
 	console.log('connected')
 	connection.on('error', function() {
@@ -16,5 +15,3 @@ connection.connect(function() {
 		console.log('received message', message)
 	})
 })
-
-console.log('co')

@@ -20,7 +20,6 @@ Session::~Session() {
 Persistent<Function> Session::constructor;
 
 void Session::Init(Handle<Object> target) {
-	// gg_debug_level = 255;
 	// Prepare constructor template
 	Local<FunctionTemplate> tpl = FunctionTemplate::New(New);
 
