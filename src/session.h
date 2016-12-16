@@ -7,7 +7,7 @@
 #include <node.h>
 #include "libgadu.h"
 
-class Session : public node::ObjectWrap {
+class Session : public ObjectWrap {
 public:
 	static void Init(v8::Handle<v8::Object> target);
 
