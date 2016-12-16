@@ -65,4 +65,4 @@ void init(Handle<Object> target) {
 
 }
 
-NODE_MODULE(binding, init);
+NODE_MODULE(addon, init);
