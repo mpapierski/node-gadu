@@ -54,29 +54,34 @@ void Session::New(const FunctionCallbackInfo<Value>& args) {
 	args.GetReturnValue().Set(args.This());
 }
 
-v8::Handle<v8::Value> Session::Login(const v8::Arguments& args) {
-	HandleScope scope;
+void Session::Login(const FunctionCallbackInfo<Value>& args) {
+	Isolate* isolate = args.GetIsolate();
 	Session * obj = ObjectWrap::Unwrap<Session>(args.This());
 	struct gg_login_params p;
 	memset(&p, 0, sizeof(struct gg_login_params));
 	p.uin = args[0]->NumberValue();
 	p.password = *v8::String::AsciiValue(args[1]->ToString());
 	p.async = 1;
-	// Features
 	p.protocol_features = GG_FEATURE_IMAGE_DESCR;
+	
 	// Save persistent callback
 	obj->login_callback_ = Persistent<Function>::New(Local<Function>::Cast(args[2]));
-	// Do login.
+	
+	// Do login
 	struct ::gg_session * sess = ::gg_login(&p);
+	
 	if (!sess) {
 		const char * error = strerror(errno);
-		return v8::ThrowException(v8::String::New(error));
+		isolate->ThrowException(String::NewFromUtf8(isolate, error));
 	}
+	
 	obj->session_ = sess;
+	
 	// Start polling
 	obj->poll_fd_ = static_cast<uv_poll_t*>(malloc(sizeof(uv_poll_t)));
 	uv_poll_init(uv_default_loop(), obj->poll_fd_, sess->fd);
 	obj->poll_fd_->data = obj;
+	
 	// Setup ping timer.
 	obj->timer_poll_ = new uv_timer_t;
 	uv_timer_init(uv_default_loop(), obj->timer_poll_);
@@ -84,51 +89,64 @@ v8::Handle<v8::Value> Session::Login(const v8::Arguments& args) {
 	uv_timer_start(obj->timer_poll_, ping_callback, 0, 60000);
 
 	// Watch for R/W
-	if ((sess->check & GG_CHECK_READ))
+	if ((sess->check & GG_CHECK_READ)) {
 		uv_poll_start(obj->poll_fd_, UV_READABLE, gadu_perform);
-	if ((sess->check & GG_CHECK_WRITE))
+	}
+	
+	if ((sess->check & GG_CHECK_WRITE)) {
 		uv_poll_start(obj->poll_fd_, UV_WRITABLE, gadu_perform);
-	return args.This();
+	}
+	
+	args.GetReturnValue().Set(args.This());
 }
 
-v8::Handle<v8::Value> Session::SendMessage(const v8::Arguments& args) {
-	HandleScope scope;
+void Session::SendMessage(const FunctionCallbackInfo<Value>& args) {
+	Isolate* isolate = args.GetIsolate();
 	Session * obj = ObjectWrap::Unwrap<Session>(args.This());
 	unsigned long uin = args[0]->NumberValue();
-	unsigned char * text = reinterpret_cast<unsigned char*>(*v8::String::AsciiValue(args[1]->ToString()));
+	unsigned char * text = reinterpret_cast<unsigned char*>(*String::AsciiValue(args[1]->ToString()));
 	int seq = gg_send_message(obj->session_, GG_CLASS_MSG, uin, text);
+	
 	if (seq < 0) {
 		obj->disconnect();
 	}
-	return Number::New(seq);
+	
+	args.GetReturnValue().Set(Number::New(seq));
 }
 
-v8::Handle<v8::Value> Session::Notify(const v8::Arguments& args) {
-	HandleScope scope;
+void Session::Notify(const FunctionCallbackInfo<Value>& args) {
+	Isolate* isolate = args.GetIsolate();
 	Session * obj = ObjectWrap::Unwrap<Session>(args.This());
 	struct gg_session * sess = obj->session_;
 
 	// Convert v8::Array of Numbers to std::vector.
 	std::vector<uin_t> contacts;
+	
 	if ((args.Length() == 1) && args[0]->IsArray()) {
 		Handle<Array> values = Handle<Array>::Cast(args[0]);
 		std::vector<uin_t> vec(values->Length());
+		
 		for (unsigned int i = 0; i < values->Length(); i++) {
 			Local<Value> index = Number::New(i);
 			Local<Value> value = values->Get(index);
+			
 			if (!value->IsNumber()) {
-				return ThrowException(Exception::TypeError(String::New("Invalid uin")));
+				isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Invalid uin")));
 			}
+			
 			uin_t uin = value->ToObject()->Uint32Value();
 			vec[i] = uin;
 		}
+		
 		contacts.swap(vec);
 	}
+	
 	// Notify server with contact list.
 	if (gg_notify(sess, contacts.data(), contacts.size()) < 0) {
 		obj->disconnect();
 	}
-	return args.This();
+	
+	args.GetReturnValue().Set(args.This());
 }
 
 v8::Handle<v8::Value> Session::Logoff(const v8::Arguments& args) {
