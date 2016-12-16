@@ -25,17 +25,20 @@ extern "C" {
  */
 void Init(Local<Object> exports) {
 	NODE_SET_METHOD(exports, "version", Version);
+	
 	// Events
 	NODE_DEFINE_CONSTANT(exports, GG_EVENT_CONN_SUCCESS);
 	NODE_DEFINE_CONSTANT(exports, GG_EVENT_CONN_FAILED);
 	NODE_DEFINE_CONSTANT(exports, GG_EVENT_MSG);
 	NODE_DEFINE_CONSTANT(exports, GG_EVENT_ACK);
+	
 	// Ack defines
 	NODE_DEFINE_CONSTANT(exports, GG_ACK_BLOCKED);
 	NODE_DEFINE_CONSTANT(exports, GG_ACK_DELIVERED);
 	NODE_DEFINE_CONSTANT(exports, GG_ACK_QUEUED);
 	NODE_DEFINE_CONSTANT(exports, GG_ACK_MBOXFULL);
 	NODE_DEFINE_CONSTANT(exports, GG_ACK_NOT_DELIVERED);
+	
 	// Message classes
 	NODE_DEFINE_CONSTANT(exports, GG_CLASS_QUEUED);
 	NODE_DEFINE_CONSTANT(exports, GG_CLASS_OFFLINE);
@@ -44,6 +47,7 @@ void Init(Local<Object> exports) {
 	NODE_DEFINE_CONSTANT(exports, GG_CLASS_CTCP);
 	NODE_DEFINE_CONSTANT(exports, GG_CLASS_ACK);
 	NODE_DEFINE_CONSTANT(exports, GG_CLASS_EXT);
+	
 	// Descriptions
 	NODE_DEFINE_CONSTANT(exports, GG_STATUS_NOT_AVAIL);
 	NODE_DEFINE_CONSTANT(exports, GG_STATUS_NOT_AVAIL_DESCR);
@@ -65,6 +69,8 @@ void Init(Local<Object> exports) {
 	NODE_DEFINE_CONSTANT(exports, GG_STATUS_FLAG_VIDEO);
 	NODE_DEFINE_CONSTANT(exports, GG_STATUS_FLAG_MOBILE);
 	NODE_DEFINE_CONSTANT(exports, GG_STATUS_FLAG_SPAM);
+	
+	// Initialization
 	Session::Init(exports);
 }
 
