@@ -4,6 +4,7 @@
 #include "session.h"
 
 using v8::FunctionCallbackInfo;
+using v8::Isolate;
 using v8::Local;
 using v8::Object;
 using v8::String;
@@ -13,7 +14,8 @@ using v8::Value;
  * Return version of libgadu.
  */
 void Version(const FunctionCallbackInfo<Value>& args) {
-	args.GetReturnValue().Set(String::New(::gg_libgadu_version()));
+	Isolate* isolate = args.GetIsolate();
+	args.GetReturnValue().Set(String::NewFromUtf8(isloate, ::gg_libgadu_version()));
 }
 
 extern "C" {
