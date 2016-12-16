@@ -35,8 +35,8 @@ void Session::Init(Local<Object> exports) {
 	NODE_SET_PROTOTYPE_METHOD(tpl, "notify", Notify);
 	NODE_SET_PROTOTYPE_METHOD(tpl, "changeStatus", ChangeStatus);
 
-	constructor = Persistent<Function, CopyablePersistentTraits<Function>> persistent(isolate, tpl->GetFunction());
-	exports->Set(String::NewSymbol("Session"), constructor);
+	constructor = Persistent<Function>::Persistent(isolate, tpl->GetFunction());	
+	exports->Set(String::NewFromUtf8(isolate, "Session"), constructor);
 }
 
 
