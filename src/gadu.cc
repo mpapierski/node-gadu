@@ -15,7 +15,7 @@ using v8::Value;
  */
 void Version(const FunctionCallbackInfo<Value>& args) {
 	Isolate* isolate = args.GetIsolate();
-	args.GetReturnValue().Set(String::NewFromUtf8(isloate, ::gg_libgadu_version()));
+	args.GetReturnValue().Set(String::NewFromUtf8(isolate, ::gg_libgadu_version()));
 }
 
 extern "C" {
