@@ -6,6 +6,7 @@
 #include <map>
 #include <node.h>
 #include <node_object_wrap.h>
+#include <uv.h>
 #include "libgadu.h"
 
 class Session : public node::ObjectWrap {
