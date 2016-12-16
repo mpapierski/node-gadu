@@ -19,15 +19,13 @@ Session::~Session() {
 
 Persistent<Function> Session::constructor;
 
-void Session::Init(Handle<Object> target) {
+void Session::Init(Local<Object> exports) {
 	// Prepare constructor template
 	Local<FunctionTemplate> tpl = FunctionTemplate::New(New);
-
 	tpl->SetClassName(String::NewSymbol("Session"));
 	tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
 	// Prototype
-
 	NODE_SET_PROTOTYPE_METHOD(tpl, "login", Login);
 	NODE_SET_PROTOTYPE_METHOD(tpl, "logoff", Logoff);
 	NODE_SET_PROTOTYPE_METHOD(tpl, "send", SendMessage);
@@ -35,7 +33,7 @@ void Session::Init(Handle<Object> target) {
 	NODE_SET_PROTOTYPE_METHOD(tpl, "changeStatus", ChangeStatus);
 
 	constructor = Persistent<Function>::New(tpl->GetFunction());
-	target->Set(String::NewSymbol("Session"), constructor);
+	exports->Set(String::NewSymbol("Session"), constructor);
 }
 
 
