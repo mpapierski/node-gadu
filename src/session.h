@@ -5,18 +5,21 @@
 #include <ctime>
 #include <map>
 #include <node.h>
+#include <node_object_wrap.h>
 #include "libgadu.h"
 
 class Session : public node::ObjectWrap {
 public:
-	static void Init(v8::Handle<v8::Object> target);
+	static void Init(v8::Local<v8::Object> exports);
 
 private:
-	static v8::Persistent<v8::Function> constructor;
-	Session();
+	explicit Session();
 	~Session();
+	
+	static v8::Persistent<v8::Function> constructor;
 
 	static void New(const v8::FunctionCallbackInfo<v8::Value>& args);
+	
 	/**
 	 * Connect to a server.
 	 */
@@ -31,22 +34,27 @@ private:
 	 * Notify with contact list
 	 */
 	static void Notify(const v8::FunctionCallbackInfo<v8::Value>& args);
+	
 	/**
 	 * Logoff from server
 	 */
 	static void Logoff(const v8::FunctionCallbackInfo<v8::Value>& args);
+	
 	/**
 	 * Change status
 	 */
 	static void ChangeStatus(const v8::FunctionCallbackInfo<v8::Value>& args);
+	
 	/**
 	 * Low-level handle.
 	 */
 	struct gg_session * session_;
+	
 	/**
 	 * Login params.
 	 */
 	struct gg_login_params login_params_;
+	
 	/**
 	 * FD poller
 	 */
