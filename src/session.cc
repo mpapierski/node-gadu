@@ -24,7 +24,7 @@ void Session::Init(Local<Object> exports) {
 	Isolate* isolate = exports->GetIsolate();
 	
 	// Prepare constructor template
-	Local<FunctionTemplate> tpl = FunctionTemplate::New(isolate);
+	Local<FunctionTemplate> tpl = FunctionTemplate::New(isolate, New);
 	tpl->SetClassName(String::NewFromUtf8(isolate, "Session"));
 	tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
@@ -35,8 +35,8 @@ void Session::Init(Local<Object> exports) {
 	NODE_SET_PROTOTYPE_METHOD(tpl, "notify", Notify);
 	NODE_SET_PROTOTYPE_METHOD(tpl, "changeStatus", ChangeStatus);
 
-	constructor = Persistent<Function>::Persistent(isolate, tpl->GetFunction());	
-	exports->Set(String::NewFromUtf8(isolate, "Session"), constructor);
+	constructor.Reset(isolate, tpl->GetFunction());
+  	exports->Set(String::NewFromUtf8(isolate, "Session"), tpl->GetFunction());
 }
 
 
