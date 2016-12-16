@@ -8,7 +8,6 @@ using v8::Local;
 using v8::Object;
 using v8::String;
 using v8::Value;
-using v8::Session;
 
 /**
  * Return version of libgadu.
