@@ -13,6 +13,7 @@ Session::Session()
 	, poll_fd_(0)
 	, timer_poll_(0) {
 }
+
 Session::~Session() {
 }
 
@@ -20,8 +21,10 @@ Session::~Session() {
 Persistent<Function> Session::constructor;
 
 void Session::Init(Local<Object> exports) {
+	Isolate* isolate = exports->GetIsolate();
+	
 	// Prepare constructor template
-	Local<FunctionTemplate> tpl = FunctionTemplate::New();
+	Local<FunctionTemplate> tpl = FunctionTemplate::New(isolate);
 	tpl->SetClassName(String::NewSymbol("Session"));
 	tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
