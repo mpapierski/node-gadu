@@ -21,7 +21,7 @@ Persistent<Function> Session::constructor;
 
 void Session::Init(Local<Object> exports) {
 	// Prepare constructor template
-	Local<FunctionTemplate> tpl = FunctionTemplate::New(New);
+	Local<FunctionTemplate> tpl = FunctionTemplate::New();
 	tpl->SetClassName(String::NewSymbol("Session"));
 	tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
