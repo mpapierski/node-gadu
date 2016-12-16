@@ -63,7 +63,7 @@ void Init(Local<Object> exports) {
 	NODE_DEFINE_CONSTANT(exports, GG_STATUS_FLAG_VIDEO);
 	NODE_DEFINE_CONSTANT(exports, GG_STATUS_FLAG_MOBILE);
 	NODE_DEFINE_CONSTANT(exports, GG_STATUS_FLAG_SPAM);
-	Session::Init(target);
+	Session::Init(exports);
 }
 
 }
