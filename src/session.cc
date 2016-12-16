@@ -40,18 +40,18 @@ void Session::Init(Local<Object> exports) {
 }
 
 
-Handle<Value> Session::New(const Arguments& args) {
-	HandleScope scope;
-	Session * obj = new Session();
+void Session::New(const FunctionCallbackInfo<Value>& args) {
+	Isolate* isolate = args.GetIsolate();
+	Session* obj = new Session();
 	obj->Wrap(args.This());
 
 	// Install global DNS resolver
 	if (gg_global_set_custom_resolver(uv_resolver_start, uv_resolver_cleanup) < 0) {
-		const char * error = strerror(errno);
-		return ThrowException(String::New(error));
+		const char* error = strerror(errno);
+		return ThrowException(String::NewFromUtf8(isolate, error));
 	}
 
-	return args.This();
+	args.GetReturnValue().Set(args.This());
 }
 
 v8::Handle<v8::Value> Session::Login(const v8::Arguments& args) {
