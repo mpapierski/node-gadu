@@ -16,29 +16,29 @@ private:
 	Session();
 	~Session();
 
-	static v8::Handle<v8::Value> New(const v8::Arguments& args);
+	static v8::Handle<v8::Value> New(const v8::internal::Arguments& args);
 	/**
 	 * Connect to a server.
 	 */
-	static v8::Handle<v8::Value> Login(const v8::Arguments& args);
+	static v8::Handle<v8::Value> Login(const v8::internal::Arguments& args);
 
 	/**
 	 * Send message.
 	 */
-	static v8::Handle<v8::Value> SendMessage(const v8::Arguments& args);
+	static v8::Handle<v8::Value> SendMessage(const v8::internal::Arguments& args);
 
 	/**
 	 * Notify with contact list
 	 */
-	static v8::Handle<v8::Value> Notify(const v8::Arguments& args);
+	static v8::Handle<v8::Value> Notify(const v8::internal::Arguments& args);
 	/**
 	 * Logoff from server
 	 */
-	static v8::Handle<v8::Value> Logoff(const v8::Arguments& args);
+	static v8::Handle<v8::Value> Logoff(const v8::internal::Arguments& args);
 	/**
 	 * Change status
 	 */
-	static v8::Handle<v8::Value> ChangeStatus(const v8::Arguments& args);
+	static v8::Handle<v8::Value> ChangeStatus(const v8::internal::Arguments& args);
 	/**
 	 * Low-level handle.
 	 */
