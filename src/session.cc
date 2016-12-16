@@ -25,7 +25,7 @@ void Session::Init(Local<Object> exports) {
 	
 	// Prepare constructor template
 	Local<FunctionTemplate> tpl = FunctionTemplate::New(isolate);
-	tpl->SetClassName(String::NewSymbol("Session"));
+	tpl->SetClassName(String::NewFromUtf8(isolate, "Session"));
 	tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
 	// Prototype
