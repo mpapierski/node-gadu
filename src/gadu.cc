@@ -8,9 +8,8 @@ using namespace v8;
 /**
  * Return version of libgadu.
  */
-Handle<Value> Version(const v8::internal::Arguments& args) {
-	HandleScope scope;
-	return scope.Close(String::New(::gg_libgadu_version()));
+void Version(const FunctionCallbackInfo<Value>& args) {
+	args.GetReturnValue().Set(String::New(::gg_libgadu_version()));
 }
 
 extern "C" {
