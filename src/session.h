@@ -34,7 +34,7 @@ private:
 	/**
 	 * Logoff from server
 	 */
-	static v8::Handle<v8::Value> Logoff(const v8::FunctionCallbackInfo<v8::Value>& args);
+	static void Logoff(const v8::FunctionCallbackInfo<v8::Value>& args);
 	/**
 	 * Change status
 	 */
