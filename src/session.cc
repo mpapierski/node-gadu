@@ -48,7 +48,7 @@ void Session::New(const FunctionCallbackInfo<Value>& args) {
 	// Install global DNS resolver
 	if (gg_global_set_custom_resolver(uv_resolver_start, uv_resolver_cleanup) < 0) {
 		const char* error = strerror(errno);
-		return ThrowException(String::NewFromUtf8(isolate, error));
+		isolate->ThrowException(String::NewFromUtf8(isolate, error));
 	}
 
 	args.GetReturnValue().Set(args.This());
