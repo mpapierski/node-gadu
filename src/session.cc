@@ -149,8 +149,7 @@ void Session::Notify(const FunctionCallbackInfo<Value>& args) {
 	args.GetReturnValue().Set(args.This());
 }
 
-v8::Handle<v8::Value> Session::Logoff(const v8::Arguments& args) {
-	HandleScope scope;
+void Session::Logoff(const FunctionCallbackInfo<Value>& args) {
 	Session * obj = ObjectWrap::Unwrap<Session>(args.This());
 	struct gg_session * sess = obj->session_;
 	gg_logoff(sess);
@@ -159,33 +158,39 @@ v8::Handle<v8::Value> Session::Logoff(const v8::Arguments& args) {
 	uv_timer_stop(obj->timer_poll_);
 	uv_close((uv_handle_t*)obj->timer_poll_, (uv_close_cb)free);
 	gg_free_session(sess);
-	return args.This();
+	rargs.GetReturnValue().Set(args.This());
 }
 
-v8::Handle<v8::Value> Session::ChangeStatus(const v8::Arguments& args) {
-	HandleScope scope;
+void Session::ChangeStatus(const FunctionCallbackInfo<Value>& args) {
+	Isolate* isolate = args.GetIsolate();
 	Session * obj = ObjectWrap::Unwrap<Session>(args.This());
 	struct gg_session * sess = obj->session_;
 	int result = 0;
+	
 	if (args.Length() <= 2) {
 		// Status
 		int status = args[0]->NumberValue();
+		
 		if (args.Length() == 2) {
 			// Description is optional
 			if (!args[1]->IsString()) {
-				return ThrowException(Exception::TypeError(String::New("String required")));
+				isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "String required")));
 			}
+			
 			const char * message = *String::AsciiValue(args[1]->ToString());
 			result = gg_change_status_descr(sess, status, message);
 		} else {
 			result = gg_change_status(sess, status);
 		}
+		
 		if (result < 0) {
 			obj->disconnect();
 		}
-		return args.This();
+		
+		args.GetReturnValue().Set(args.This());
 	}
-	return ThrowException(Exception::Error(String::New("Invalid arguments")));
+    
+    args.GetReturnValue().Set(isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Invalid arguments"))););
 }
 
 void Session::gadu_perform(uv_poll_t *req, int status, int events) {
