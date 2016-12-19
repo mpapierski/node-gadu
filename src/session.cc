@@ -61,7 +61,7 @@ void Session::Login(const FunctionCallbackInfo<Value>& args) {
 	struct gg_login_params p;
 	memset(&p, 0, sizeof(struct gg_login_params));
 	p.uin = args[0]->NumberValue();
-	p.password = Utf8Value(args[1]->ToString());
+	p.password = String::Utf8Value(args[1]->ToString());
 	p.async = 1;
 	p.protocol_features = GG_FEATURE_IMAGE_DESCR;
 	
