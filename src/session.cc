@@ -60,7 +60,7 @@ void Session::Login(const FunctionCallbackInfo<Value>& args) {
 	struct gg_login_params p;
 	memset(&p, 0, sizeof(struct gg_login_params));
 	p.uin = args[0]->NumberValue();
-	p.password = *v8::String::AsciiValue(args[1]->ToString());
+	p.password = *v8::Utf8Value(args[1]->ToString());
 	p.async = 1;
 	p.protocol_features = GG_FEATURE_IMAGE_DESCR;
 	
@@ -158,7 +158,7 @@ void Session::Logoff(const FunctionCallbackInfo<Value>& args) {
 	uv_timer_stop(obj->timer_poll_);
 	uv_close((uv_handle_t*)obj->timer_poll_, (uv_close_cb)free);
 	gg_free_session(sess);
-	rargs.GetReturnValue().Set(args.This());
+	args.GetReturnValue().Set(args.This());
 }
 
 void Session::ChangeStatus(const FunctionCallbackInfo<Value>& args) {
