@@ -87,10 +87,10 @@ void Session::Login(const FunctionCallbackInfo<Value>& args) {
 	obj->poll_fd_->data = obj;
 	
 	// Setup ping timer.
-	obj->timer_poll_ = new uv_timer_t;
+	obj->timer_poll_ = new uv_timer_t();
 	uv_timer_init(uv_default_loop(), obj->timer_poll_);
 	obj->timer_poll_->data = obj;
-	uv_timer_start(obj->timer_poll_&, ping_callback, 0, 60000);
+	uv_timer_start(obj->timer_poll_, ping_callback, 0, 60000);
 
 	// Watch for R/W
 	if ((sess->check & GG_CHECK_READ)) {
