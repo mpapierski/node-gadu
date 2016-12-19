@@ -190,7 +190,7 @@ void Session::ChangeStatus(const FunctionCallbackInfo<Value>& args) {
 		args.GetReturnValue().Set(args.This());
 	}
     
-    args.GetReturnValue().Set(isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Invalid arguments"))););
+    args.GetReturnValue().Set(isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Invalid arguments"))));
 }
 
 void Session::gadu_perform(uv_poll_t *req, int status, int events) {
@@ -261,14 +261,18 @@ void Session::gadu_perform(uv_poll_t *req, int status, int events) {
 		
 	}
 	// Watch for R/W again
-	if ((sess->check & GG_CHECK_READ))
+	if ((sess->check & GG_CHECK_READ)) {
 		uv_poll_start(obj->poll_fd_, UV_READABLE, gadu_perform);
-	if ((sess->check & GG_CHECK_WRITE))
+    }
+    
+	if ((sess->check & GG_CHECK_WRITE)) {
 		uv_poll_start(obj->poll_fd_, UV_WRITABLE, gadu_perform);
+    }
 }
 
 void Session::ping_callback(uv_timer_t * timer, int status) {
 	Session * obj = static_cast<Session *>(timer->data);
+    
 	if (gg_ping(obj->session_) < 0) {
 		return;
 	}	
@@ -279,6 +283,7 @@ void Session::disconnect() {
 		uv_poll_stop(poll_fd_);
 		uv_close((uv_handle_t*)poll_fd_, (uv_close_cb)free);
 	}
+    
 	if (timer_poll_) {
 		uv_timer_stop(timer_poll_);
 		uv_close((uv_handle_t*)timer_poll_, (uv_close_cb)free);
