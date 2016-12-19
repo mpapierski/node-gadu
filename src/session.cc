@@ -2,6 +2,7 @@
 #include <cerrno>
 #include <cstring>
 #include <cstdlib>
+#include <v8.h>
 #include "session.h"
 #include "helpers.h"
 #include "uv_resolver.h"
@@ -60,7 +61,7 @@ void Session::Login(const FunctionCallbackInfo<Value>& args) {
 	struct gg_login_params p;
 	memset(&p, 0, sizeof(struct gg_login_params));
 	p.uin = args[0]->NumberValue();
-	p.password = *v8::Utf8Value(args[1]->ToString());
+	p.password = Utf8Value(args[1]->ToString());
 	p.async = 1;
 	p.protocol_features = GG_FEATURE_IMAGE_DESCR;
 	
