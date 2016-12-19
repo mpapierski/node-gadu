@@ -58,7 +58,7 @@ void Session::New(const FunctionCallbackInfo<Value>& args) {
 
 void Session::Login(const FunctionCallbackInfo<Value>& args) {
 	Isolate* isolate = args.GetIsolate();
-	Session * obj = ObjectWrap::Unwrap<Session>(args.This());
+	Session* obj = ObjectWrap::Unwrap<Session>(args.This());
 	struct gg_login_params p;
 	memset(&p, 0, sizeof(struct gg_login_params));
 	p.uin = args[0]->NumberValue();
@@ -70,10 +70,10 @@ void Session::Login(const FunctionCallbackInfo<Value>& args) {
 	obj->login_callback_ = Persistent<Function>::New(Local<Function>::Cast(args[2]));
 	
 	// Do login
-	struct ::gg_session * sess = ::gg_login(&p);
+	struct ::gg_session* sess = ::gg_login(&p);
 	
 	if (!sess) {
-		const char * error = strerror(errno);
+		const char* error = strerror(errno);
 		isolate->ThrowException(String::NewFromUtf8(isolate, error));
 	}
 	
@@ -104,9 +104,9 @@ void Session::Login(const FunctionCallbackInfo<Value>& args) {
 
 void Session::SendMessage(const FunctionCallbackInfo<Value>& args) {
 	Isolate* isolate = args.GetIsolate();
-	Session * obj = ObjectWrap::Unwrap<Session>(args.This());
+	Session* obj = ObjectWrap::Unwrap<Session>(args.This());
 	unsigned long uin = args[0]->NumberValue();
-	unsigned char * text = reinterpret_cast<unsigned char*>(*String::AsciiValue(args[1]->ToString()));
+	unsigned char* text = reinterpret_cast<unsigned char*>(*String::Utf8Value(args[1]->ToString()));
 	int seq = gg_send_message(obj->session_, GG_CLASS_MSG, uin, text);
 	
 	if (seq < 0) {
@@ -118,8 +118,8 @@ void Session::SendMessage(const FunctionCallbackInfo<Value>& args) {
 
 void Session::Notify(const FunctionCallbackInfo<Value>& args) {
 	Isolate* isolate = args.GetIsolate();
-	Session * obj = ObjectWrap::Unwrap<Session>(args.This());
-	struct gg_session * sess = obj->session_;
+	Session* obj = ObjectWrap::Unwrap<Session>(args.This());
+	struct gg_session* sess = obj->session_;
 
 	// Convert v8::Array of Numbers to std::vector.
 	std::vector<uin_t> contacts;
@@ -152,8 +152,8 @@ void Session::Notify(const FunctionCallbackInfo<Value>& args) {
 }
 
 void Session::Logoff(const FunctionCallbackInfo<Value>& args) {
-	Session * obj = ObjectWrap::Unwrap<Session>(args.This());
-	struct gg_session * sess = obj->session_;
+	Session* obj = ObjectWrap::Unwrap<Session>(args.This());
+	struct gg_session* sess = obj->session_;
 	gg_logoff(sess);
 	uv_poll_stop(obj->poll_fd_);
 	uv_close((uv_handle_t*)obj->poll_fd_, (uv_close_cb)free);
@@ -165,8 +165,8 @@ void Session::Logoff(const FunctionCallbackInfo<Value>& args) {
 
 void Session::ChangeStatus(const FunctionCallbackInfo<Value>& args) {
 	Isolate* isolate = args.GetIsolate();
-	Session * obj = ObjectWrap::Unwrap<Session>(args.This());
-	struct gg_session * sess = obj->session_;
+	Session* obj = ObjectWrap::Unwrap<Session>(args.This());
+	struct gg_session* sess = obj->session_;
 	int result = 0;
 	
 	if (args.Length() <= 2) {
@@ -179,7 +179,7 @@ void Session::ChangeStatus(const FunctionCallbackInfo<Value>& args) {
 				isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "String required")));
 			}
 			
-			const char * message = *String::AsciiValue(args[1]->ToString());
+			const char* message = *String::Utf8Value(args[1]->ToString());
 			result = gg_change_status_descr(sess, status, message);
 		} else {
 			result = gg_change_status(sess, status);
@@ -195,13 +195,13 @@ void Session::ChangeStatus(const FunctionCallbackInfo<Value>& args) {
     args.GetReturnValue().Set(isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Invalid arguments"))));
 }
 
-void Session::gadu_perform(uv_poll_t *req, int status, int events) {
-	Session * obj = static_cast<Session *>(req->data);
-	struct gg_session * sess = obj->session_;
+void Session::gadu_perform(uv_poll_t* req, int status, int events) {
+	Session* obj = static_cast<Session*>(req->data);
+	struct gg_session* sess = obj->session_;
 	
 	if (sess && ((events & UV_READABLE) ||
 			(events & UV_WRITABLE) || (sess->timeout == 0 && sess->soft_timeout))) {	
-		struct gg_event * e = 0;
+		struct gg_event* e = 0;
 		raii_destructor<struct gg_event> destructor(e, &gg_free_event);
 		
 		if (!(e = gg_watch_fd(sess))) {
@@ -219,41 +219,42 @@ void Session::gadu_perform(uv_poll_t *req, int status, int events) {
 
 		Local<Object> target = Object::New();
 		switch (e->type) {
-		case GG_EVENT_CONN_FAILED:
-			gg_logoff(sess);
-			obj->disconnect();
-			return;
-		case GG_EVENT_MSG: {
-			// Received message.
+			case GG_EVENT_CONN_FAILED:
+				gg_logoff(sess);
+				obj->disconnect();
+				return;
+			case GG_EVENT_MSG: {
+				// Received message.
+				NODE_SET_ATTRIBUTE(target, "sender", Number::New(e->event.msg.sender));
+				NODE_SET_ATTRIBUTE(target, "msgclass", Number::New(e->event.msg.msgclass));
+				NODE_SET_ATTRIBUTE(target, "time", Number::New(e->event.msg.time));
 
-			NODE_SET_ATTRIBUTE(target, "sender", Number::New(e->event.msg.sender));
-			NODE_SET_ATTRIBUTE(target, "msgclass", Number::New(e->event.msg.msgclass));
-			NODE_SET_ATTRIBUTE(target, "time", Number::New(e->event.msg.time));
-
-			Local<Array> recipients = Array::New(e->event.msg.recipients_count);
-			for (int i = 0; i < e->event.msg.recipients_count; i++) {
-				recipients->Set(Number::New(i), Number::New(*(e->event.msg.recipients + i)));
+				Local<Array> recipients = Array::New(e->event.msg.recipients_count);
+            
+				for (int i = 0; i < e->event.msg.recipients_count; i++) {
+					recipients->Set(Number::New(i), Number::New(*(e->event.msg.recipients + i)));
+				}
+            
+				NODE_SET_ATTRIBUTE(target, "recipients", recipients);
+				// TODO:
+				// formats_length
+				// formats
+				NODE_SET_ATTRIBUTE(target, "seq", Number::New(e->event.msg.seq));
+				char* xhtml_message = reinterpret_cast<char*>(e->event.msg.xhtml_message);
+				NODE_SET_ATTRIBUTE(target, "xhtml_message", !xhtml_message ? Null() : String::New(xhtml_message));
+				char* message = reinterpret_cast<char*>(e->event.msg.message);
+				NODE_SET_ATTRIBUTE(target, "message", !message ? Null() : String::New(message));
+				break;
 			}
-			NODE_SET_ATTRIBUTE(target, "recipients", recipients);
-			// TODO:
-			// formats_length
-			// formats
-			NODE_SET_ATTRIBUTE(target, "seq", Number::New(e->event.msg.seq));
-			char * xhtml_message = reinterpret_cast<char*>(e->event.msg.xhtml_message);
-			NODE_SET_ATTRIBUTE(target, "xhtml_message", !xhtml_message ? Null() : String::New(xhtml_message));
-			char * message = reinterpret_cast<char*>(e->event.msg.message);
-			NODE_SET_ATTRIBUTE(target, "message", !message ? Null() : String::New(message));
-			break;
-		}
-		case GG_EVENT_ACK: {
-			// Message is acknowledged.
-			NODE_SET_ATTRIBUTE(target, "recipient", Number::New(e->event.ack.recipient));
-			NODE_SET_ATTRIBUTE(target, "status", Number::New(e->event.ack.status));
-			NODE_SET_ATTRIBUTE(target, "seq", Number::New(e->event.ack.seq));
-			break;
-		}
-		default:
-			break;
+			case GG_EVENT_ACK: {
+				// Message is acknowledged.
+				NODE_SET_ATTRIBUTE(target, "recipient", Number::New(e->event.ack.recipient));
+				NODE_SET_ATTRIBUTE(target, "status", Number::New(e->event.ack.status));
+				NODE_SET_ATTRIBUTE(target, "seq", Number::New(e->event.ack.seq));
+				break;
+			}
+			default:
+				break;
 		}
 		// Add target event details to the event object.
 		event->Set(String::NewSymbol("target"), target);
@@ -272,8 +273,8 @@ void Session::gadu_perform(uv_poll_t *req, int status, int events) {
     }
 }
 
-void Session::ping_callback(uv_timer_t * timer, int status) {
-	Session * obj = static_cast<Session *>(timer->data);
+void Session::ping_callback(uv_timer_t* timer, int status) {
+	Session* obj = static_cast<Session*>(timer->data);
     
 	if (gg_ping(obj->session_) < 0) {
 		return;
