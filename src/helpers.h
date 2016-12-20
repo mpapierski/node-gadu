@@ -30,11 +30,11 @@ public:
 };
 
 /* Useful macros */
-
 #define NODE_SET_ATTRIBUTE(target, key, value) \
 	do { \
+        
 		unsigned int mask = v8::ReadOnly | v8::DontDelete; \
-		target->Set(String::NewSymbol(key), \
+		target->Set(String::NewFromUtf8(isolate, key), \
 			(value), \
 			static_cast<v8::PropertyAttribute>(mask)); \
 	} while(0)
