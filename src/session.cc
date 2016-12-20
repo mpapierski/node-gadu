@@ -229,7 +229,7 @@ void Session::gadu_perform(uv_poll_t* req, int status, int events) {
 				NODE_SET_ATTRIBUTE(target, "sender", Number::New(isolate, e->event.msg.sender));
 				NODE_SET_ATTRIBUTE(target, "msgclass", Number::New(isolate, e->event.msg.msgclass));
 				NODE_SET_ATTRIBUTE(target, "time", Number::New(isolate, e->event.msg.time));
-				Local<Array> recipients = Array::New(e->event.msg.recipients_count);
+				Local<Array> recipients = Array::New(isolate, e->event.msg.recipients_count);
             
 				for (int i = 0; i < e->event.msg.recipients_count; i++) {
 					recipients->Set(Number::New(isolate, i), Number::New(isolate, *(e->event.msg.recipients + i)));
