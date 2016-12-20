@@ -115,7 +115,7 @@ void Session::SendMessage(const FunctionCallbackInfo<Value>& args) {
 		obj->disconnect();
 	}
 	
-	args.GetReturnValue().Set(Number::New(seq));
+	args.GetReturnValue().Set(Number::New(isolate, seq));
 }
 
 void Session::Notify(const FunctionCallbackInfo<Value>& args) {
@@ -131,7 +131,7 @@ void Session::Notify(const FunctionCallbackInfo<Value>& args) {
 		std::vector<uin_t> vec(values->Length());
 		
 		for (unsigned int i = 0; i < values->Length(); i++) {
-			Local<Value> index = Number::New(i);
+			Local<Value> index = Number::New(isolate, i);
 			Local<Value> value = values->Get(index);
 			
 			if (!value->IsNumber()) {
@@ -201,8 +201,7 @@ void Session::gadu_perform(uv_poll_t* req, int status, int events) {
 	Session* obj = static_cast<Session*>(req->data);
 	struct gg_session* sess = obj->session_;
 	
-	if (sess && ((events & UV_READABLE) ||
-			(events & UV_WRITABLE) || (sess->timeout == 0 && sess->soft_timeout))) {	
+	if (sess && ((events & UV_READABLE) || (events & UV_WRITABLE) || (sess->timeout == 0 && sess->soft_timeout))) {	
 		struct gg_event* e = 0;
 		raii_destructor<struct gg_event> destructor(e, &gg_free_event);
 		
@@ -216,10 +215,9 @@ void Session::gadu_perform(uv_poll_t* req, int status, int events) {
 		
 		// Construct a new object with the events data.
 		Local<Object> event = Object::New();
-
 		NODE_SET_ATTRIBUTE(event, "type", Number::New(e->type));
-
 		Local<Object> target = Object::New();
+		
 		switch (e->type) {
 			case GG_EVENT_CONN_FAILED:
 				gg_logoff(sess);
@@ -230,7 +228,6 @@ void Session::gadu_perform(uv_poll_t* req, int status, int events) {
 				NODE_SET_ATTRIBUTE(target, "sender", Number::New(e->event.msg.sender));
 				NODE_SET_ATTRIBUTE(target, "msgclass", Number::New(e->event.msg.msgclass));
 				NODE_SET_ATTRIBUTE(target, "time", Number::New(e->event.msg.time));
-
 				Local<Array> recipients = Array::New(e->event.msg.recipients_count);
             
 				for (int i = 0; i < e->event.msg.recipients_count; i++) {
@@ -258,13 +255,16 @@ void Session::gadu_perform(uv_poll_t* req, int status, int events) {
 			default:
 				break;
 		}
+		
 		// Add target event details to the event object.
 		event->Set(String::NewSymbol("target"), target);
+		
 		// Call the callback with newly created object.
 		Local<Value> argv[1] = { Local<Value>::New(event) };
 		obj->login_callback_->Call(Context::GetCurrent()->Global(), 1, argv);
 		
 	}
+    
 	// Watch for R/W again
 	if ((sess->check & GG_CHECK_READ)) {
 		uv_poll_start(obj->poll_fd_, UV_READABLE, gadu_perform);
