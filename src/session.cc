@@ -215,9 +215,9 @@ void Session::gadu_perform(uv_poll_t* req, int status, int events) {
 		}
 		
 		// Construct a new object with the events data.
-		Local<Object> event = Object::New();
+		Local<Object> event = Object::New(isolate);
 		NODE_SET_ATTRIBUTE(event, "type", Number::New(isolate, e->type));
-		Local<Object> target = Object::New();
+		Local<Object> target = Object::New(isolate);
 		
 		switch (e->type) {
 			case GG_EVENT_CONN_FAILED:
