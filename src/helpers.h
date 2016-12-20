@@ -33,7 +33,6 @@ public:
 #define NODE_SET_ATTRIBUTE(isolate, target, key, value) \
 	do { \
 		unsigned int mask = v8::ReadOnly | v8::DontDelete; \
-		target->Set(String::NewFromUtf8(isolate, key), (value), static_cast<v8::PropertyAttribute>(mask)); \
+		target->Set(String::NewFromUtf8(isolate, key), value); \
 	} while(0)
-
 #endif
