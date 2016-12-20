@@ -34,7 +34,7 @@ public:
 	do { \
         	Isolate* isolate = Isolate::GetCurrent(); \
 		unsigned int mask = v8::ReadOnly | v8::DontDelete; \
-		target->Set(String::NewFromUtf8(isolate, key), \
+		target->Set(String::NewFromUtf8(isolate, key)), \
 			(value), \
 			static_cast<v8::PropertyAttribute>(mask)); \
 	} while(0)
