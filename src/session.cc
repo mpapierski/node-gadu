@@ -241,9 +241,9 @@ void Session::gadu_perform(uv_poll_t* req, int status, int events) {
 				// formats
 				NODE_SET_ATTRIBUTE(target, "seq", Number::New(isolate, e->event.msg.seq));
 				char* xhtml_message = reinterpret_cast<char*>(e->event.msg.xhtml_message);
-				NODE_SET_ATTRIBUTE(target, "xhtml_message", !xhtml_message ? Null() : String::New(xhtml_message));
+				NODE_SET_ATTRIBUTE(target, "xhtml_message", !xhtml_message ? Null() : String::NewFromUtf8(isolate, xhtml_message));
 				char* message = reinterpret_cast<char*>(e->event.msg.message);
-				NODE_SET_ATTRIBUTE(target, "message", !message ? Null() : String::New(message));
+				NODE_SET_ATTRIBUTE(target, "message", !message ? Null() : String::NewFromUtf8(isolate, message));
 				break;
 			}
 			case GG_EVENT_ACK: {
