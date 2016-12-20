@@ -198,6 +198,7 @@ void Session::ChangeStatus(const FunctionCallbackInfo<Value>& args) {
 }
 
 void Session::gadu_perform(uv_poll_t* req, int status, int events) {
+	Isolate* isolate = Isolate::GetCurrent();
 	Session* obj = static_cast<Session*>(req->data);
 	struct gg_session* sess = obj->session_;
 	
@@ -207,7 +208,7 @@ void Session::gadu_perform(uv_poll_t* req, int status, int events) {
 		
 		if (!(e = gg_watch_fd(sess))) {
 			// In case of error, event value passed is Undefined.
-			Local<Value> argv[1] = { Local<Value>::New(Undefined()) };
+			Local<Value> argv[1] = { Local<Value>::New(isolate, Undefined()) };
 			obj->login_callback_->Call(Context::GetCurrent()->Global(), 1, argv);
 			obj->disconnect();
 			return;
@@ -215,7 +216,7 @@ void Session::gadu_perform(uv_poll_t* req, int status, int events) {
 		
 		// Construct a new object with the events data.
 		Local<Object> event = Object::New();
-		NODE_SET_ATTRIBUTE(event, "type", Number::New(e->type));
+		NODE_SET_ATTRIBUTE(event, "type", Number::New(isolate, e->type));
 		Local<Object> target = Object::New();
 		
 		switch (e->type) {
@@ -225,20 +226,20 @@ void Session::gadu_perform(uv_poll_t* req, int status, int events) {
 				return;
 			case GG_EVENT_MSG: {
 				// Received message.
-				NODE_SET_ATTRIBUTE(target, "sender", Number::New(e->event.msg.sender));
-				NODE_SET_ATTRIBUTE(target, "msgclass", Number::New(e->event.msg.msgclass));
-				NODE_SET_ATTRIBUTE(target, "time", Number::New(e->event.msg.time));
+				NODE_SET_ATTRIBUTE(target, "sender", Number::New(isolate, e->event.msg.sender));
+				NODE_SET_ATTRIBUTE(target, "msgclass", Number::New(isolate, e->event.msg.msgclass));
+				NODE_SET_ATTRIBUTE(target, "time", Number::New(isolate, e->event.msg.time));
 				Local<Array> recipients = Array::New(e->event.msg.recipients_count);
             
 				for (int i = 0; i < e->event.msg.recipients_count; i++) {
-					recipients->Set(Number::New(i), Number::New(*(e->event.msg.recipients + i)));
+					recipients->Set(Number::New(isolate, i), Number::New(isolate, *(e->event.msg.recipients + i)));
 				}
             
 				NODE_SET_ATTRIBUTE(target, "recipients", recipients);
 				// TODO:
 				// formats_length
 				// formats
-				NODE_SET_ATTRIBUTE(target, "seq", Number::New(e->event.msg.seq));
+				NODE_SET_ATTRIBUTE(target, "seq", Number::New(isolate, e->event.msg.seq));
 				char* xhtml_message = reinterpret_cast<char*>(e->event.msg.xhtml_message);
 				NODE_SET_ATTRIBUTE(target, "xhtml_message", !xhtml_message ? Null() : String::New(xhtml_message));
 				char* message = reinterpret_cast<char*>(e->event.msg.message);
@@ -247,9 +248,9 @@ void Session::gadu_perform(uv_poll_t* req, int status, int events) {
 			}
 			case GG_EVENT_ACK: {
 				// Message is acknowledged.
-				NODE_SET_ATTRIBUTE(target, "recipient", Number::New(e->event.ack.recipient));
-				NODE_SET_ATTRIBUTE(target, "status", Number::New(e->event.ack.status));
-				NODE_SET_ATTRIBUTE(target, "seq", Number::New(e->event.ack.seq));
+				NODE_SET_ATTRIBUTE(target, "recipient", Number::New(isolate, e->event.ack.recipient));
+				NODE_SET_ATTRIBUTE(target, "status", Number::New(isolate, e->event.ack.status));
+				NODE_SET_ATTRIBUTE(target, "seq", Number::New(isolate, e->event.ack.seq));
 				break;
 			}
 			default:
