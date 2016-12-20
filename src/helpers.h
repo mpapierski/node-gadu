@@ -32,7 +32,7 @@ public:
 /* Useful macros */
 #define NODE_SET_ATTRIBUTE(target, key, value) \
 	do { \
-        
+        	Isolate* isolate = Isolate::GetCurrent();
 		unsigned int mask = v8::ReadOnly | v8::DontDelete; \
 		target->Set(String::NewFromUtf8(isolate, key), \
 			(value), \
