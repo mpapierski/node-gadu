@@ -216,7 +216,7 @@ void Session::gadu_perform(uv_poll_t* req, int status, int events) {
 		
 		// Construct a new object with the events data.
 		Local<Object> event = Object::New(isolate);
-		NODE_SET_ATTRIBUTE(event, "type", Number::New(isolate, e->type));
+		NODE_SET_ATTRIBUTE(isolate, event, "type", Number::New(isolate, e->type));
 		Local<Object> target = Object::New(isolate);
 		
 		switch (e->type) {
@@ -226,31 +226,31 @@ void Session::gadu_perform(uv_poll_t* req, int status, int events) {
 				return;
 			case GG_EVENT_MSG: {
 				// Received message.
-				NODE_SET_ATTRIBUTE(target, "sender", Number::New(isolate, e->event.msg.sender));
-				NODE_SET_ATTRIBUTE(target, "msgclass", Number::New(isolate, e->event.msg.msgclass));
-				NODE_SET_ATTRIBUTE(target, "time", Number::New(isolate, e->event.msg.time));
+				NODE_SET_ATTRIBUTE(isolate, target, "sender", Number::New(isolate, e->event.msg.sender));
+				NODE_SET_ATTRIBUTE(isolate, target, "msgclass", Number::New(isolate, e->event.msg.msgclass));
+				NODE_SET_ATTRIBUTE(isolate, target, "time", Number::New(isolate, e->event.msg.time));
 				Local<Array> recipients = Array::New(isolate, e->event.msg.recipients_count);
             
 				for (int i = 0; i < e->event.msg.recipients_count; i++) {
 					recipients->Set(Number::New(isolate, i), Number::New(isolate, *(e->event.msg.recipients + i)));
 				}
             
-				NODE_SET_ATTRIBUTE(target, "recipients", recipients);
+				NODE_SET_ATTRIBUTE(isolate, target, "recipients", recipients);
 				// TODO:
 				// formats_length
 				// formats
-				NODE_SET_ATTRIBUTE(target, "seq", Number::New(isolate, e->event.msg.seq));
+				NODE_SET_ATTRIBUTE(isolate, target, "seq", Number::New(isolate, e->event.msg.seq));
 				char* xhtml_message = reinterpret_cast<char*>(e->event.msg.xhtml_message);
-				NODE_SET_ATTRIBUTE(target, "xhtml_message", !xhtml_message ? Null() : String::NewFromUtf8(isolate, xhtml_message));
+				NODE_SET_ATTRIBUTE(isolate, target, "xhtml_message", !xhtml_message ? Null() : String::NewFromUtf8(isolate, xhtml_message));
 				char* message = reinterpret_cast<char*>(e->event.msg.message);
-				NODE_SET_ATTRIBUTE(target, "message", !message ? Null() : String::NewFromUtf8(isolate, message));
+				NODE_SET_ATTRIBUTE(isolate, target, "message", !message ? Null() : String::NewFromUtf8(isolate, message));
 				break;
 			}
 			case GG_EVENT_ACK: {
 				// Message is acknowledged.
-				NODE_SET_ATTRIBUTE(target, "recipient", Number::New(isolate, e->event.ack.recipient));
-				NODE_SET_ATTRIBUTE(target, "status", Number::New(isolate, e->event.ack.status));
-				NODE_SET_ATTRIBUTE(target, "seq", Number::New(isolate, e->event.ack.seq));
+				NODE_SET_ATTRIBUTE(isolate, target, "recipient", Number::New(isolate, e->event.ack.recipient));
+				NODE_SET_ATTRIBUTE(isolate, target, "status", Number::New(isolate, e->event.ack.status));
+				NODE_SET_ATTRIBUTE(isolate, target, "seq", Number::New(isolate, e->event.ack.seq));
 				break;
 			}
 			default:
@@ -258,10 +258,10 @@ void Session::gadu_perform(uv_poll_t* req, int status, int events) {
 		}
 		
 		// Add target event details to the event object.
-		event->Set(String::NewSymbol("target"), target);
+		event->Set(String::NewFromUtf8(isolate, "target"), target);
 		
 		// Call the callback with newly created object.
-		Local<Value> argv[1] = { Local<Value>::New(event) };
+		Local<Value> argv[1] = { Local<Value>::New(isolate, event) };
 		obj->login_callback_->Call(Context::GetCurrent()->Global(), 1, argv);
 		
 	}
