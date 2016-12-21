@@ -236,14 +236,28 @@ void Session::gadu_perform(uv_poll_t* req, int status, int events) {
 				}
             
 				NODE_SET_ATTRIBUTE(isolate, target, "recipients", recipients);
+            
 				// TODO:
 				// formats_length
 				// formats
 				NODE_SET_ATTRIBUTE(isolate, target, "seq", Number::New(isolate, e->event.msg.seq));
-				char* xhtml_message = reinterpret_cast<char*>(e->event.msg.xhtml_message);
-				NODE_SET_ATTRIBUTE(isolate, target, "xhtml_message", !xhtml_message ? Null(isolate) : String::NewFromUtf8(isolate, xhtml_message));
+				
+                char* xhtml_message = reinterpret_cast<char*>(e->event.msg.xhtml_message);
+            
+                if (!xhtml_message) {
+                    NODE_SET_ATTRIBUTE(isolate, target, "xhtml_message", Null(isolate));
+                } else {
+                    NODE_SET_ATTRIBUTE(isolate, target, "xhtml_message", String::NewFromUtf8(isolate, xhtml_message));
+                }
+			
 				char* message = reinterpret_cast<char*>(e->event.msg.message);
-				NODE_SET_ATTRIBUTE(isolate, target, "message", !message ? Null(isolate) : String::NewFromUtf8(isolate, message));
+            
+                if (!message) {
+                    NODE_SET_ATTRIBUTE(isolate, target, "message", Null(isolate));
+                } else {
+                    NODE_SET_ATTRIBUTE(isolate, target, "message", String::NewFromUtf8(isolate, message));
+                }
+            
 				break;
 			}
 			case GG_EVENT_ACK: {
