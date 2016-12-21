@@ -208,7 +208,7 @@ void Session::gadu_perform(uv_poll_t* req, int status, int events) {
 		
 		if (!(e = gg_watch_fd(sess))) {
 			// In case of error, event value passed is Undefined.
-			Local<Value> argv[1] = { Local<Value>::New(isolate, Undefined()) };
+			Local<Value> argv[1] = { Local<Value>::New(isolate, Undefined(isolate)) };
 			obj->login_callback_->Call(Context::GetCurrent()->Global(), 1, argv);
 			obj->disconnect();
 			return;
@@ -241,9 +241,9 @@ void Session::gadu_perform(uv_poll_t* req, int status, int events) {
 				// formats
 				NODE_SET_ATTRIBUTE(isolate, target, "seq", Number::New(isolate, e->event.msg.seq));
 				char* xhtml_message = reinterpret_cast<char*>(e->event.msg.xhtml_message);
-				NODE_SET_ATTRIBUTE(isolate, target, "xhtml_message", !xhtml_message ? Null() : String::NewFromUtf8(isolate, xhtml_message));
+				NODE_SET_ATTRIBUTE(isolate, target, "xhtml_message", !xhtml_message ? Null(isolate) : String::NewFromUtf8(isolate, xhtml_message));
 				char* message = reinterpret_cast<char*>(e->event.msg.message);
-				NODE_SET_ATTRIBUTE(isolate, target, "message", !message ? Null() : String::NewFromUtf8(isolate, message));
+				NODE_SET_ATTRIBUTE(isolate, target, "message", !message ? Null(isolate) : String::NewFromUtf8(isolate, message));
 				break;
 			}
 			case GG_EVENT_ACK: {
