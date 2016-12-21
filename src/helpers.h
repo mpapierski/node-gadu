@@ -33,6 +33,6 @@ public:
 #define NODE_SET_ATTRIBUTE(isolate, target, key, value) \
 	do { \
 		unsigned int attribs = v8::PropertyAttribute::ReadOnly | v8::PropertyAttribute::DontDelete; \
-		target->ForceSet(String::NewFromUtf8(isolate, key), value, mask); \
+		target->ForceSet(String::NewFromUtf8(isolate, key), value, attribs); \
 	} while(0)
 #endif
