@@ -32,7 +32,6 @@ public:
 /* Useful macros */
 #define NODE_SET_ATTRIBUTE(isolate, target, key, value) \
 	do { \
-		v8::PropertyAttribute attribs = v8::PropertyAttribute::ReadOnly | v8::PropertyAttribute::DontDelete; \
-		target->ForceSet(String::NewFromUtf8(isolate, key), value, attribs); \
+		target->ForceSet(String::NewFromUtf8(isolate, key), value, v8::PropertyAttribute::ReadOnly); \
 	} while(0)
 #endif
