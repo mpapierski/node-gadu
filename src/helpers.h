@@ -34,6 +34,7 @@ public:
 /* Useful macros */
 #define NODE_SET_ATTRIBUTE(isolate, target, key, value) \
 	do { \
-		return target->DefineOwnProperty(isolate->GetCurrentContext(), String::NewFromUtf8(isolate, key), value, PropertyAttribute::ReadOnly); \
+		Maybe<bool> result = target->DefineOwnProperty(isolate->GetCurrentContext(), String::NewFromUtf8(isolate, key), value, PropertyAttribute::ReadOnly); \
+		result = Null(isolate); \
 	} while(0)
 #endif
