@@ -209,7 +209,7 @@ void Session::gadu_perform(uv_poll_t* req, int status, int events) {
 		if (!(e = gg_watch_fd(sess))) {
 			// In case of error, event value passed is Undefined.
 			Local<Value> argv[1] = { Local<Value>::New(isolate, Undefined(isolate)) };
-			obj->login_callback_->Call(Context::GetCurrent()->Global(), 1, argv);
+			obj->login_callback_->Call(isolate->GetCurrentContext(), 1, argv);
 			obj->disconnect();
 			return;
 		}
