@@ -1,6 +1,8 @@
 #if !defined(HELPERS_H)
 #define HELPERS_H
 
+using namespace v8;
+
 /**
  * Default destructor - call delete.
  */
@@ -32,6 +34,6 @@ public:
 /* Useful macros */
 #define NODE_SET_ATTRIBUTE(isolate, target, key, value) \
 	do { \
-		v8::Maybe<bool> result = target->DefineOwnProperty(isolate->GetCurrentContext(), String::NewFromUtf8(isolate, key), value, v8::PropertyAttribute::ReadOnly); \
+		return target->DefineOwnProperty(isolate->GetCurrentContext(), String::NewFromUtf8(isolate, key), value, PropertyAttribute::ReadOnly); \
 	} while(0)
 #endif
