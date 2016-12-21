@@ -276,7 +276,7 @@ void Session::gadu_perform(uv_poll_t* req, int status, int events) {
 		
 		// Call the callback with newly created object.
 		Local<Value> argv[1] = { Local<Value>::New(isolate, event) };
-		obj->login_callback_->Call(Context::GetCurrent()->Global(), 1, argv);
+		obj->login_callback_->Call(isolate->GetCurrentContext(), 1, argv);
 		
 	}
     
