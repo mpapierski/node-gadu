@@ -67,9 +67,7 @@ void Session::Login(const FunctionCallbackInfo<Value>& args) {
 	p.protocol_features = GG_FEATURE_IMAGE_DESCR;
 	
 	// Save persistent callback
-	//Persistent<Function> callback;
 	obj->login_callback_.Reset(isolate, Local<Function>::Cast(args[2]));
-	//obj->login_callback_;
 	
 	// Do login
 	struct ::gg_session* sess = ::gg_login(&p);
@@ -274,9 +272,7 @@ void Session::gadu_perform(uv_poll_t* req, int status, int events) {
 		event->Set(String::NewFromUtf8(isolate, "target"), target);
 		
 		// Call the callback with newly created object.
-		Local<Value> argv[1] = { Local<Value>::New(isolate, event) };
-		obj->login_callback_->Call(isolate->GetCurrentContext(), 1, argv);
-		
+		obj->login_callback_.Reset(isolate, Local<Value>::New(isolate, event));
 	}
     
 	// Watch for R/W again
