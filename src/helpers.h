@@ -32,6 +32,6 @@ public:
 /* Useful macros */
 #define NODE_SET_ATTRIBUTE(isolate, target, key, value) \
 	do { \
-		bool result = target->DefineOwnProperty(isolate->GetCurrentContext(), String::NewFromUtf8(isolate, key), value, v8::PropertyAttribute::ReadOnly); \
+		v8::Maybe<bool> result = target->DefineOwnProperty(isolate->GetCurrentContext(), String::NewFromUtf8(isolate, key), value, v8::PropertyAttribute::ReadOnly); \
 	} while(0)
 #endif
