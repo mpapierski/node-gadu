@@ -67,9 +67,9 @@ void Session::Login(const FunctionCallbackInfo<Value>& args) {
 	p.protocol_features = GG_FEATURE_IMAGE_DESCR;
 	
 	// Save persistent callback
-	Persistent<Function> callback;
-	callback.Reset(isolate, Local<Function>::Cast(args[2]));
-	obj->login_callback_ = callback;
+	//Persistent<Function> callback;
+	obj->login_callback_.Reset(isolate, Local<Function>::Cast(args[2]));
+	//obj->login_callback_;
 	
 	// Do login
 	struct ::gg_session* sess = ::gg_login(&p);
