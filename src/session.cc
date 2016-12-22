@@ -206,7 +206,7 @@ void Session::gadu_perform(uv_poll_t* req, int status, int events) {
 		
 		if (!(e = gg_watch_fd(sess))) {
 			// In case of error, event value passed is Undefined.
-			//obj->login_callback_.Reset(isolate, Local<Value>::New(isolate, Undefined(isolate)));
+			obj->login_callback_.Call(isolate, Local<Value>::New(isolate, Undefined(isolate)));
 			obj->disconnect();
 			return;
 		}
@@ -272,7 +272,7 @@ void Session::gadu_perform(uv_poll_t* req, int status, int events) {
 		event->Set(String::NewFromUtf8(isolate, "target"), target);
 		
 		// Call the callback with newly created object.
-		//obj->login_callback_.Reset(isolate, Local<Value>::New(isolate, event));
+		obj->login_callback_.Call(isolate, Local<Value>::New(isolate, event));
 	}
     
 	// Watch for R/W again
