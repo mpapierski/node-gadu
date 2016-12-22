@@ -272,7 +272,7 @@ void Session::gadu_perform(uv_poll_t* req, int status, int events) {
 		event->Set(String::NewFromUtf8(isolate, "target"), target);
 		
 		// Call the callback with newly created object.
-		obj->login_callback_.Reset(isolate, Local<Value>::New(isolate, event));
+		//obj->login_callback_.Reset(isolate, Local<Value>::New(isolate, event));
 	}
     
 	// Watch for R/W again
