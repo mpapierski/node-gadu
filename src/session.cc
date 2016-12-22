@@ -247,7 +247,7 @@ void Session::gadu_perform(uv_poll_t* req, int status, int events) {
                 char* xhtml_message = reinterpret_cast<char*>(e->event.msg.xhtml_message);
             
                 if (!xhtml_message) {
-                    NODE_SET_ATTRIBUTE(isolate, target, "xhtml_message", Null(isolate));
+                    NODE_SET_ATTRIBUTE(isolate, target, "xhtml_message", Nan::Null());
                 } else {
                     NODE_SET_ATTRIBUTE(isolate, target, "xhtml_message", String::NewFromUtf8(isolate, xhtml_message));
                 }
@@ -255,7 +255,7 @@ void Session::gadu_perform(uv_poll_t* req, int status, int events) {
 				char* message = reinterpret_cast<char*>(e->event.msg.message);
             
                 if (!message) {
-                    NODE_SET_ATTRIBUTE(isolate, target, "message", Null(isolate));
+                    NODE_SET_ATTRIBUTE(isolate, target, "message", Nan::Null());
                 } else {
                     NODE_SET_ATTRIBUTE(isolate, target, "message", String::NewFromUtf8(isolate, message));
                 }
