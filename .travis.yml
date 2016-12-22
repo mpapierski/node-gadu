@@ -3,6 +3,17 @@ env:
   - LIBGADU_VERSION="1.12.1"
 node_js:
   - 6.9
+addons:
+  apt:
+    sources:
+    # add PPAs with more up-to-date toolchains
+    - ubuntu-toolchain-r-test
+    - llvm-toolchain-precise-3.6
+    packages:
+    # install toolchains
+    - gcc-5
+    - g++-5
+    - clang-3.6
 before_install:
   - "pushd $PWD"
   - "cd /tmp"
@@ -10,8 +21,6 @@ before_install:
   - "tar -zxvf libgadu-$LIBGADU_VERSION.tar.gz"
   - "cd libgadu-$LIBGADU_VERSION"
   - "./configure --prefix=/usr"
-  - "sudo apt-get update"
-  - "sudo apt-get install gcc-4.8 g++-4.8"
   - "make"
   - "sudo make install"
   - "popd"
