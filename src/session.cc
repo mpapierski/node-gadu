@@ -51,7 +51,7 @@ void Session::New(const FunctionCallbackInfo<Value>& args) {
 	// Install global DNS resolver
 	if (gg_global_set_custom_resolver(uv_resolver_start, uv_resolver_cleanup) < 0) {
 		const char* error = strerror(errno);
-		isolate->ThrowException(String::NewFromUtf8(isolate, error));
+		args.GetReturnValue().Set(isolate->ThrowException(String::NewFromUtf8(isolate, error)));
 	}
 
 	args.GetReturnValue().Set(args.This());
@@ -75,7 +75,7 @@ void Session::Login(const FunctionCallbackInfo<Value>& args) {
 	
 	if (!sess) {
 		const char* error = strerror(errno);
-		isolate->ThrowException(String::NewFromUtf8(isolate, error));
+		args.GetReturnValue().Set(isolate->ThrowException(String::NewFromUtf8(isolate, error)));
 	}
 	
 	obj->session_ = sess;
@@ -134,7 +134,7 @@ void Session::Notify(const FunctionCallbackInfo<Value>& args) {
 			Local<Value> value = values->Get(index);
 			
 			if (!value->IsNumber()) {
-				isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Invalid uin")));
+				args.GetReturnValue().Set(isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Invalid uin"))));
 			}
 			
 			uin_t uin = value->ToObject()->Uint32Value();
@@ -177,7 +177,7 @@ void Session::ChangeStatus(const FunctionCallbackInfo<Value>& args) {
 		if (args.Length() == 2) {
 			// Description is optional
 			if (!args[1]->IsString()) {
-				isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "String required")));
+				args.GetReturnValue().Set(isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "String required"))));
 			}
 			
 			const char* message = *String::Utf8Value(args[1]->ToString());
