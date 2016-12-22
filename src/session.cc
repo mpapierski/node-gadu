@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <v8.h>
 #include <uv.h>
+#include <nan.h>
 #include "session.h"
 #include "helpers.h"
 #include "uv_resolver.h"
