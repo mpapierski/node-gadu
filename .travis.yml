@@ -6,14 +6,9 @@ node_js:
 addons:
   apt:
     sources:
-    # add PPAs with more up-to-date toolchains
     - ubuntu-toolchain-r-test
-    - llvm-toolchain-precise-3.6
     packages:
-    # install toolchains
-    - gcc-5
-    - g++-5
-    - clang-3.6
+    - g++-4.8
 before_install:
   - "pushd $PWD"
   - "cd /tmp"
