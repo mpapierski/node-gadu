@@ -2,7 +2,7 @@ language: node_js
 env:
   - LIBGADU_VERSION="1.11.2"
 node_js:
-  - 7.3.0
+  - 6.9
 before_install:
   - "pushd $PWD"
   - "cd /tmp"
