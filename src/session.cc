@@ -285,7 +285,7 @@ void Session::gadu_perform(uv_poll_t* req, int status, int events) {
     }
 }
 
-void Session::ping_callback(uv_timer_t* timer, int status) {
+void (*uv_timer_cb)Session::ping_callback(uv_timer_t* timer, int status) {
 	Session* obj = static_cast<Session*>(timer->data);
     
 	if (gg_ping(obj->session_) < 0) {
