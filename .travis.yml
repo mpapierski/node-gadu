@@ -6,7 +6,7 @@ node_js:
 before_install:
   - "pushd $PWD"
   - "cd /tmp"
-  - "wget http://toxygen.net/libgadu/files/libgadu-$LIBGADU_VERSION.tar.gz"
+  - "wget http://github.com/wojtekka/libgadu/releases/download/$LIBGADU_VERSION/libgadu-$LIBGADU_VERSION.tar.gz"
   - "tar -zxvf libgadu-$LIBGADU_VERSION.tar.gz"
   - "cd libgadu-$LIBGADU_VERSION"
   - "./configure --prefix=/usr"
