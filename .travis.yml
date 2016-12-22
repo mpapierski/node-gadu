@@ -11,7 +11,7 @@ addons:
     - gcc-4.8
     - g++-4.8
 before_install:
-  - "apt-get install"
+  - "sudo apt-get install"
   - "pushd $PWD"
   - "cd /tmp"
   - "wget http://github.com/wojtekka/libgadu/releases/download/$LIBGADU_VERSION/libgadu-$LIBGADU_VERSION.tar.gz"
