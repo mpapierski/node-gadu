@@ -26,7 +26,7 @@ See [http://toxygen.net/libgadu/](http://toxygen.net/libgadu/).
 Gives information about `libgadu`.
 
 	> Gadu.version()
-	'1.11.2'
+	'1.12.1'
 
 ### Events
 
