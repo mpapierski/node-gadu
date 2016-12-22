@@ -206,7 +206,7 @@ void Session::gadu_perform(uv_poll_t* req, int status, int events) {
 		
 		if (!(e = gg_watch_fd(sess))) {
 			// In case of error, event value passed is Undefined.
-			obj->login_callback_.Reset(isolate, Local<Value>::New(isolate, Undefined(isolate)));
+			//obj->login_callback_.Reset(isolate, Local<Value>::New(isolate, Undefined(isolate)));
 			obj->disconnect();
 			return;
 		}
