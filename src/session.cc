@@ -206,11 +206,11 @@ void Session::gadu_perform(uv_poll_t* req, int status, int events) {
 		raii_destructor<struct gg_event> destructor(e, &gg_free_event);
 		
 		if (!(e = gg_watch_fd(sess))) {
-			// In case of error, event value passed is Undefined.
-			//Local<Function>::New(isolate, obj->login_callback_)->Call(isolate->GetCurrentContext()->Global(), 1, argv);
- 			Nan::Callback callback(Local<Function>::New(isolate, obj->login_callback_));
- 			const unsigned argc = 1;
-   			Local<Value> argv[argc] = { Nan::Undefined() };
+			// In case of error, event value passed is Undefined
+			const unsigned argc = 1;
+			Local<Value> argv[argc] = { Nan::Undefined() };
+			Nan::Callback callback;
+ 			callback.SetFunction(Local<Function>::New(isolate, obj->login_callback_));
 			callback.Call(argc, argv);
 			obj->disconnect();
 			return;
@@ -277,9 +277,11 @@ void Session::gadu_perform(uv_poll_t* req, int status, int events) {
 		event->Set(String::NewFromUtf8(isolate, "target"), target);
 		
 		// Call the callback with newly created object.
-		
-		
-		obj->login_callback_.Call(isolate, Local<Value>::New(isolate, event));
+		const unsigned argc = 1;
+		Local<Value> argv[argc] = { Local<Value>::New(isolate, event) };
+		Nan::Callback callback;
+		callback.SetFunction(Local<Function>::New(isolate, obj->login_callback_));
+		callback.Call(argc, argv);
 	}
     
 	// Watch for R/W again
