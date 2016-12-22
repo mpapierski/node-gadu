@@ -88,7 +88,7 @@ void Session::Login(const FunctionCallbackInfo<Value>& args) {
 	obj->timer_poll_ = new uv_timer_t();
 	uv_timer_init(uv_default_loop(), obj->timer_poll_);
 	obj->timer_poll_->data = obj;
-	uv_timer_start(obj->timer_poll_, Session::ping_callback, 0, 60000);
+	uv_timer_start(obj->timer_poll_, (uv_timer_cb) &Session::ping_callback, 0, 60000);
 
 	// Watch for R/W
 	if ((sess->check & GG_CHECK_READ)) {
@@ -285,7 +285,7 @@ void Session::gadu_perform(uv_poll_t* req, int status, int events) {
     }
 }
 
-void Session::(*uv_timer_cb)ping_callback(uv_timer_t* timer, int status) {
+void Session::ping_callback(uv_timer_t* timer, int status) {
 	Session* obj = static_cast<Session*>(timer->data);
     
 	if (gg_ping(obj->session_) < 0) {
