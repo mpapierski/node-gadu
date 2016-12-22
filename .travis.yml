@@ -4,14 +4,14 @@ env:
 node_js:
   - 6.9
 addons:
-  coverity_scan:
-      build_command_prepend: cov-configure --comptype gcc --compiler $CC && ./configure
-      build_command: make
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - gcc-4.8
+    - g++-4.8
 before_install:
-  - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
-  - sudo apt-get update -qq
-  - if [ "$CXX" = "g++" ]; then sudo apt-get install -qq g++-4.8; fi
-  - if [ "$CXX" = "g++" ]; then export CXX="g++-4.8" CC="gcc-4.8"; fi
+  - "apt-get install"
   - "pushd $PWD"
   - "cd /tmp"
   - "wget http://github.com/wojtekka/libgadu/releases/download/$LIBGADU_VERSION/libgadu-$LIBGADU_VERSION.tar.gz"
