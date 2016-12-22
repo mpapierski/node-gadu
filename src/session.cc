@@ -209,7 +209,7 @@ void Session::gadu_perform(uv_poll_t* req, int status, int events) {
 			// In case of error, event value passed is Undefined.
 			Nan::Callback callback(obj->login_callback_);
 			const unsigned argc = 1;
-  			Local<Value> argv[argc] = { Local::New(isolate, Undefined(isolate)) };
+  			Local<Value> argv[argc] = { Nan::Undefined() };
 			callback.Call(argc, argv);
 			obj->disconnect();
 			return;
