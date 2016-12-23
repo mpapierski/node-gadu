@@ -1,6 +1,7 @@
 language: node_js
 env:
   - LIBGADU_VERSION="1.12.1"
+  - CXX=g++-4.8
 node_js:
   - 6.9
 addons:
