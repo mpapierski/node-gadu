@@ -3,6 +3,7 @@ node_js:
   - 6.9
 env:
   - CXX=g++-4.8
+  - LIBGADU_VERSION=1.12.1
 addons:
   apt:
     sources:
@@ -12,9 +13,9 @@ addons:
 before_install:
   - "pushd $PWD"
   - "cd /tmp"
-  - "wget http://github.com/wojtekka/libgadu/releases/download/1.12.1/libgadu-1.12.1.tar.gz"
-  - "tar -zxvf libgadu-1.12.1.tar.gz"
-  - "cd libgadu-1.12.1"
+  - "wget http://github.com/wojtekka/libgadu/releases/download/$LIBGADU_VERSION/libgadu-$LIBGADU_VERSION.tar.gz"
+  - "tar -zxvf libgadu-$LIBGADU_VERSION.tar.gz"
+  - "cd libgadu-$LIBGADU_VERSION"
   - "./configure --prefix=/usr"
   - "make"
   - "sudo make install"
