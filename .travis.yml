@@ -1,6 +1,5 @@
 language: node_js
 env:
-  - LIBGADU_VERSION="1.12.1"
   - CXX=g++-4.8
 node_js:
   - 6.9
@@ -15,7 +14,7 @@ before_install:
   - "sudo apt-get install"
   - "pushd $PWD"
   - "cd /tmp"
-  - "wget http://github.com/wojtekka/libgadu/releases/download/$LIBGADU_VERSION/libgadu-$LIBGADU_VERSION.tar.gz"
+  - "wget http://github.com/wojtekka/libgadu/releases/download/1.12.1/libgadu-1.12.1.tar.gz"
   - "tar -zxvf libgadu-$LIBGADU_VERSION.tar.gz"
   - "cd libgadu-$LIBGADU_VERSION"
   - "./configure --prefix=/usr"
