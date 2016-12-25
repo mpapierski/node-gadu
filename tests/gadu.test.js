@@ -4,7 +4,7 @@ var assert = require('assert')
 
 describe('library', function() {
 	it('should return correct version', function() {
-		assert.equal(Gadu.version(), '1.11.2')
+		assert.equal(Gadu.version(), '1.12.1')
 	})
 	describe('events', function() {
 		it('has connection success', function() {
