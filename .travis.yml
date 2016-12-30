@@ -1,8 +1,8 @@
 language: node_js
 node_js:
-  - 6.9
+- 6.9
 env:
-  - CXX=g++-4.8 LIBGADU_VERSION=1.12.1
+- CXX=g++-4.8 LIBGADU_VERSION=1.12.1
 addons:
   apt:
     sources:
@@ -10,12 +10,20 @@ addons:
     packages:
     - g++-4.8
 before_install:
-  - "pushd $PWD"
-  - "cd /tmp"
-  - "wget http://github.com/wojtekka/libgadu/releases/download/$LIBGADU_VERSION/libgadu-$LIBGADU_VERSION.tar.gz"
-  - "tar -zxvf libgadu-$LIBGADU_VERSION.tar.gz"
-  - "cd libgadu-$LIBGADU_VERSION"
-  - "./configure --prefix=/usr"
-  - "make"
-  - "sudo make install"
-  - "popd"
+- pushd $PWD
+- cd /tmp
+- wget http://github.com/wojtekka/libgadu/releases/download/$LIBGADU_VERSION/libgadu-$LIBGADU_VERSION.tar.gz
+- tar -zxvf libgadu-$LIBGADU_VERSION.tar.gz
+- cd libgadu-$LIBGADU_VERSION
+- "./configure --prefix=/usr"
+- make
+- sudo make install
+- popd
+deploy:
+  provider: npm
+  email: michal@papierski.net
+  api_key:
+    secure: fyn3KjTdSgIgweqdBMVQoLVBa6UtdXf1cfqQRfEyeEObYI2K3QQSXgMziktTdfHuKFHcrgCJWxFD67/oZpANM9b6b0LpKsSFHEO0IY7EHMlizA3fE6P5f4nb31W9c/eqUj3ehnDzjRTl5+jmaLvN5i/cx33+0LGlswm9EkzXktk=
+  on:
+    tags: true
+    repo: mpapierski/node-gadu
