@@ -22,6 +22,8 @@ before_install:
 deploy:
   provider: npm
   email: michal@papierski.net
+  skip_cleanup: true
+  overwrite: true
   api_key:
     secure: fyn3KjTdSgIgweqdBMVQoLVBa6UtdXf1cfqQRfEyeEObYI2K3QQSXgMziktTdfHuKFHcrgCJWxFD67/oZpANM9b6b0LpKsSFHEO0IY7EHMlizA3fE6P5f4nb31W9c/eqUj3ehnDzjRTl5+jmaLvN5i/cx33+0LGlswm9EkzXktk=
   on:
