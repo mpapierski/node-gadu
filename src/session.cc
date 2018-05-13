@@ -63,9 +63,12 @@ void Session::Login(const FunctionCallbackInfo<Value>& args) {
 	struct gg_login_params p;
 	memset(&p, 0, sizeof(struct gg_login_params));
 	p.uin = args[0]->NumberValue();
-	p.password = *String::Utf8Value(args[1]->ToString());
+
+	String::Utf8Value passwordArg(args[1]->ToString());
+	p.password = *passwordArg;
 	p.async = 1;
 	p.protocol_features = GG_FEATURE_IMAGE_DESCR;
+	p.encoding = GG_ENCODING_UTF8;
 	
 	// Save persistent callback
 	obj->login_callback_.Reset(isolate, Local<Function>::Cast(args[2]));
@@ -79,6 +82,7 @@ void Session::Login(const FunctionCallbackInfo<Value>& args) {
 	}
 	
 	obj->session_ = sess;
+	obj->login_params_ = p;
 	
 	// Start polling
 	obj->poll_fd_ = static_cast<uv_poll_t*>(malloc(sizeof(uv_poll_t)));
@@ -200,6 +204,7 @@ void Session::gadu_perform(uv_poll_t* req, int status, int events) {
 	Isolate* isolate = Isolate::GetCurrent();
 	Session* obj = static_cast<Session*>(req->data);
 	struct gg_session* sess = obj->session_;
+	Nan::HandleScope scope;
 	
 	if (sess && ((events & UV_READABLE) || (events & UV_WRITABLE) || (sess->timeout == 0 && sess->soft_timeout))) {	
 		struct gg_event* e = 0;
