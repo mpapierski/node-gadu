@@ -184,8 +184,9 @@ void Session::ChangeStatus(const FunctionCallbackInfo<Value>& args) {
 			if (!args[1]->IsString()) {
 				args.GetReturnValue().Set(isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "String required"))));
 			}
-			
-			const char* message = *String::Utf8Value(args[1]->ToString());
+
+			String::Utf8Value statusArg(args[1]->ToString());
+			const char* message = *statusArg;
 			result = gg_change_status_descr(sess, status, message);
 		} else {
 			result = gg_change_status(sess, status);
@@ -196,6 +197,8 @@ void Session::ChangeStatus(const FunctionCallbackInfo<Value>& args) {
 		}
 		
 		args.GetReturnValue().Set(args.This());
+
+		return;
 	}
     
     args.GetReturnValue().Set(isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Invalid arguments"))));
