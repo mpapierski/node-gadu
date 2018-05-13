@@ -49,10 +49,10 @@ void Session::New(const FunctionCallbackInfo<Value>& args) {
 	obj->Wrap(args.This());
 
 	// Install global DNS resolver
-	if (gg_global_set_custom_resolver(uv_resolver_start, uv_resolver_cleanup) < 0) {
-		const char* error = strerror(errno);
-		args.GetReturnValue().Set(isolate->ThrowException(String::NewFromUtf8(isolate, error)));
-	}
+//	if (gg_global_set_custom_resolver(uv_resolver_start, uv_resolver_cleanup) < 0) {
+//		const char* error = strerror(errno);
+//		args.GetReturnValue().Set(isolate->ThrowException(String::NewFromUtf8(isolate, error)));
+//	}
 
 	args.GetReturnValue().Set(args.This());
 }
@@ -63,9 +63,12 @@ void Session::Login(const FunctionCallbackInfo<Value>& args) {
 	struct gg_login_params p;
 	memset(&p, 0, sizeof(struct gg_login_params));
 	p.uin = args[0]->NumberValue();
-	p.password = *String::Utf8Value(args[1]->ToString());
+
+	String::Utf8Value passwordArg(args[1]->ToString());
+	p.password = *passwordArg;
 	p.async = 1;
 	p.protocol_features = GG_FEATURE_IMAGE_DESCR;
+	p.encoding = GG_ENCODING_UTF8;
 	
 	// Save persistent callback
 	obj->login_callback_.Reset(isolate, Local<Function>::Cast(args[2]));
@@ -79,6 +82,7 @@ void Session::Login(const FunctionCallbackInfo<Value>& args) {
 	}
 	
 	obj->session_ = sess;
+	obj->login_params_ = p;
 	
 	// Start polling
 	obj->poll_fd_ = static_cast<uv_poll_t*>(malloc(sizeof(uv_poll_t)));
@@ -107,7 +111,8 @@ void Session::SendMessage(const FunctionCallbackInfo<Value>& args) {
 	Isolate* isolate = args.GetIsolate();
 	Session* obj = ObjectWrap::Unwrap<Session>(args.This());
 	unsigned long uin = args[0]->NumberValue();
-	unsigned char* text = reinterpret_cast<unsigned char*>(*String::Utf8Value(args[1]->ToString()));
+	String::Utf8Value messageTextArg(args[1]->ToString());
+	unsigned char* text = reinterpret_cast<unsigned char*>(*messageTextArg);
 	int seq = gg_send_message(obj->session_, GG_CLASS_MSG, uin, text);
 	
 	if (seq < 0) {
@@ -179,8 +184,9 @@ void Session::ChangeStatus(const FunctionCallbackInfo<Value>& args) {
 			if (!args[1]->IsString()) {
 				args.GetReturnValue().Set(isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "String required"))));
 			}
-			
-			const char* message = *String::Utf8Value(args[1]->ToString());
+
+			String::Utf8Value statusArg(args[1]->ToString());
+			const char* message = *statusArg;
 			result = gg_change_status_descr(sess, status, message);
 		} else {
 			result = gg_change_status(sess, status);
@@ -191,6 +197,8 @@ void Session::ChangeStatus(const FunctionCallbackInfo<Value>& args) {
 		}
 		
 		args.GetReturnValue().Set(args.This());
+
+		return;
 	}
     
     args.GetReturnValue().Set(isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Invalid arguments"))));
@@ -200,6 +208,7 @@ void Session::gadu_perform(uv_poll_t* req, int status, int events) {
 	Isolate* isolate = Isolate::GetCurrent();
 	Session* obj = static_cast<Session*>(req->data);
 	struct gg_session* sess = obj->session_;
+	Nan::HandleScope scope;
 	
 	if (sess && ((events & UV_READABLE) || (events & UV_WRITABLE) || (sess->timeout == 0 && sess->soft_timeout))) {	
 		struct gg_event* e = 0;
