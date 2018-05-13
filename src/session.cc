@@ -111,7 +111,8 @@ void Session::SendMessage(const FunctionCallbackInfo<Value>& args) {
 	Isolate* isolate = args.GetIsolate();
 	Session* obj = ObjectWrap::Unwrap<Session>(args.This());
 	unsigned long uin = args[0]->NumberValue();
-	unsigned char* text = reinterpret_cast<unsigned char*>(*String::Utf8Value(args[1]->ToString()));
+	String::Utf8Value messageTextArg(args[1]->ToString());
+	unsigned char* text = reinterpret_cast<unsigned char*>(*messageTextArg);
 	int seq = gg_send_message(obj->session_, GG_CLASS_MSG, uin, text);
 	
 	if (seq < 0) {
