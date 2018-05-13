@@ -49,10 +49,10 @@ void Session::New(const FunctionCallbackInfo<Value>& args) {
 	obj->Wrap(args.This());
 
 	// Install global DNS resolver
-	if (gg_global_set_custom_resolver(uv_resolver_start, uv_resolver_cleanup) < 0) {
-		const char* error = strerror(errno);
-		args.GetReturnValue().Set(isolate->ThrowException(String::NewFromUtf8(isolate, error)));
-	}
+//	if (gg_global_set_custom_resolver(uv_resolver_start, uv_resolver_cleanup) < 0) {
+//		const char* error = strerror(errno);
+//		args.GetReturnValue().Set(isolate->ThrowException(String::NewFromUtf8(isolate, error)));
+//	}
 
 	args.GetReturnValue().Set(args.This());
 }
